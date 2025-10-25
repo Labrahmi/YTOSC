@@ -17,101 +17,76 @@ export function isOnChannelVideosPage(): boolean {
 }
 
 /**
- * Detect which layout YouTube is using
- */
-export function detectLayout(): 'rich' | 'grid' | null {
-  const richItems = document.querySelectorAll(SELECTORS.RICH_ITEM);
-  if (richItems.length > 0) return 'rich';
-  
-  const gridItems = document.querySelectorAll(SELECTORS.GRID_VIDEO);
-  if (gridItems.length > 0) return 'grid';
-  
-  return null;
-}
-
-/**
- * Get all video elements on the page
+ * Get all video elements on the page (unified for all layouts)
  */
 export function getVideoElements(): NodeListOf<Element> {
-  let elements = document.querySelectorAll(SELECTORS.RICH_ITEM);
-  if (elements.length === 0) {
-    elements = document.querySelectorAll(SELECTORS.GRID_VIDEO);
-  }
-  return elements;
+  return document.querySelectorAll(`${SELECTORS.RICH_ITEM}, ${SELECTORS.GRID_VIDEO}`);
 }
 
 /**
- * Find thumbnail container within a video element
+ * Find thumbnail container within a video element (works for all layouts)
  */
-export function findThumbnailContainer(
-  element: Element,
-  isRichLayout: boolean
-): Element | null {
-  if (isRichLayout) {
-    let container = element.querySelector(SELECTORS.THUMBNAIL);
-    if (!container) {
-      container = element.querySelector(SELECTORS.THUMBNAIL_LINK);
-    }
-    return container;
-  } else {
-    return element.querySelector(SELECTORS.THUMBNAIL);
+export function findThumbnailContainer(element: Element): Element | null {
+  // Try main thumbnail container first
+  let container = element.querySelector(SELECTORS.THUMBNAIL);
+  if (!container) {
+    // Fallback to thumbnail link for some layouts
+    container = element.querySelector(SELECTORS.THUMBNAIL_LINK);
   }
+  return container;
 }
 
 /**
- * Find title element within a video element
+ * Find title element within a video element (works for all layouts)
  */
-export function findTitleElement(
-  element: Element,
-  isRichLayout: boolean
-): HTMLAnchorElement | null {
-  if (isRichLayout) {
-    let titleElement = element.querySelector(SELECTORS.VIDEO_TITLE_LINK) as HTMLAnchorElement;
-    if (!titleElement) {
-      titleElement = element.querySelector(SELECTORS.VIDEO_TITLE) as HTMLAnchorElement;
-    }
-    return titleElement;
-  } else {
-    return element.querySelector(SELECTORS.VIDEO_TITLE) as HTMLAnchorElement;
+export function findTitleElement(element: Element): HTMLAnchorElement | null {
+  // Try video title link first (rich layout)
+  let titleElement = element.querySelector(SELECTORS.VIDEO_TITLE_LINK) as HTMLAnchorElement;
+  if (!titleElement) {
+    // Fallback to video title (grid layout)
+    titleElement = element.querySelector(SELECTORS.VIDEO_TITLE) as HTMLAnchorElement;
   }
+  return titleElement;
 }
 
 /**
- * Find view count element within a video element
+ * Find title container for badge placement (works for all layouts)
  */
-export function findViewElement(
-  element: Element,
-  isRichLayout: boolean
-): Element | null {
-  if (isRichLayout) {
-    let viewElement = element.querySelector(`${SELECTORS.INLINE_METADATA}:nth-child(1)`);
-    if (!viewElement) {
-      const metadataItems = element.querySelectorAll(SELECTORS.INLINE_METADATA);
-      viewElement = metadataItems[0];
-    }
-    return viewElement;
-  } else {
+export function findTitleContainer(element: Element): Element | null {
+  const titleElement = findTitleElement(element);
+  if (!titleElement) return null;
+
+  // For rich layout, the title text might be in a child element
+  const titleText = titleElement.querySelector(SELECTORS.VIDEO_TITLE_TEXT);
+  return titleText || titleElement;
+}
+
+/**
+ * Find view count element within a video element (works for all layouts)
+ */
+export function findViewElement(element: Element): Element | null {
+  // Try inline metadata first (rich layout)
+  let viewElement = element.querySelector(`${SELECTORS.INLINE_METADATA}:nth-child(1)`);
+  if (!viewElement) {
+    // Fallback to metadata line span (grid layout)
     const metadataLine = element.querySelector(SELECTORS.METADATA_LINE);
-    return metadataLine ? metadataLine.querySelector('span') : null;
+    viewElement = metadataLine ? metadataLine.querySelector('span') : null;
   }
+  return viewElement;
 }
 
 /**
  * Extract title text from element
  */
-export function extractTitle(
-  titleElement: Element,
-  element: Element,
-  isRichLayout: boolean
-): string {
+export function extractTitle(titleElement: Element, element: Element): string {
   let title = titleElement.textContent?.trim() || '';
-  
-  // For rich layout, title might be in a child element
-  if (!title && isRichLayout) {
+
+  // Fallback to video title text if needed
+  if (!title) {
     const titleText = element.querySelector(SELECTORS.VIDEO_TITLE_TEXT);
     title = titleText?.textContent?.trim() || '';
   }
-  
+
   return title;
 }
 

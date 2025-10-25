@@ -4,46 +4,44 @@
 
 import type { VideoWithScore } from '@core/types';
 import { SELECTORS } from '../constants';
-import { getVideoElements, detectLayout, findThumbnailContainer } from '../utils/dom';
+import { getVideoElements, findTitleContainer } from '../utils/dom';
 import { createBadge } from '../components/badge';
 
 /**
- * Inject badges into video thumbnails
+ * Inject badges at the start of video titles
  */
 export function injectBadges(videos: VideoWithScore[]): number {
-  const isRichLayout = detectLayout() === 'rich';
   const videoElements = getVideoElements();
-  
   let badgesInjected = 0;
-  
+
   videoElements.forEach((element, index) => {
     const video = videos[index];
     if (!video || video.outlierScore === null) {
       return;
     }
-    
-    // Find thumbnail container
-    const thumbnailContainer = findThumbnailContainer(element, isRichLayout);
-    if (!thumbnailContainer) {
+
+    // Find title container for badge placement
+    const titleContainer = findTitleContainer(element);
+    if (!titleContainer) {
       return;
     }
-    
-    // ALWAYS remove existing badge (scores may have changed with new videos)
-    const existingBadge = thumbnailContainer.querySelector(SELECTORS.BADGE);
+
+    // Remove existing badge if present
+    const existingBadge = titleContainer.querySelector(SELECTORS.BADGE);
     if (existingBadge) {
       existingBadge.remove();
     }
-    
-    // Create and inject new badge with updated score
+
+    // Create and inject new badge at the start of the title
     const badge = createBadge(video.outlierScore, video);
-    thumbnailContainer.appendChild(badge);
+    titleContainer.insertBefore(badge, titleContainer.firstChild);
     badgesInjected++;
-    
-    // Update score data attribute (may have changed)
+
+    // Update score data attributes
     (element as HTMLElement).setAttribute('data-ytosc-score', video.outlierScore.toString());
     (element as HTMLElement).setAttribute('data-ytosc-url', video.url);
   });
-  
+
   return badgesInjected;
 }
 

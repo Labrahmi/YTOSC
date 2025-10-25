@@ -5,83 +5,54 @@
 import { STYLE_ID } from '../constants';
 
 export const EXTENSION_STYLES = `
-  /* Position badge container on thumbnail */
-  ytd-thumbnail, ytd-video-thumbnail {
-    position: relative;
-  }
-  
-  /* Dark gradient overlay at bottom of thumbnail for better contrast */
-  ytd-thumbnail::after, ytd-video-thumbnail::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: linear-gradient(to top, 
-      rgba(0, 0, 0, 0.8) 0%, 
-      rgba(0, 0, 0, 0.4) 40%,
-      transparent 100%);
-    pointer-events: none;
-    z-index: 50;
-  }
-  
-  .ytosc-badge {
-    position: absolute;
-    bottom: 8px;
-    left: 8px;
-    z-index: 100;
+  /* Enhanced title row styling with badge */
+  yt-formatted-string[id="video-title"] {
     display: flex;
     align-items: center;
+    line-height: 1.4;
+  }
+
+  /* Badge positioning within titles */
+  .ytosc-badge {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    padding: 6px 12px;
+    padding: 3px 8px;
+    margin-right: 6px;
     border-radius: 6px;
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 11px;
+    font-weight: 700;
     line-height: 1;
     white-space: nowrap;
     letter-spacing: 0.5px;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 
-                0 2px 4px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: default;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    vertical-align: middle;
   }
-  
+
   .ytosc-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 
-                0 3px 6px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    filter: brightness(1.1);
   }
   
   .ytosc-badge--gold {
-    background: #F44336;
+    background: linear-gradient(135deg, #FF6B6B, #F44336);
     color: #FFFFFF;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    border: 2px solid #EF5350;
   }
-  
+
   .ytosc-badge--silver {
-    background: #FF9800;
+    background: linear-gradient(135deg, #FFD93D, #FF9800);
     color: #000000;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
-    border: 2px solid #FFB74D;
   }
-  
+
   .ytosc-badge--bronze {
-    background: #FFEB3B;
+    background: linear-gradient(135deg, #FFF176, #FFEB3B);
     color: #000000;
-    text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
-    border: 2px solid #FFF176;
   }
-  
+
   .ytosc-badge--default {
-    background: #9E9E9E;
+    background: linear-gradient(135deg, #BDBDBD, #9E9E9E);
     color: #FFFFFF;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    border: 2px solid #BDBDBD;
   }
   
   /* Modal Overlay */

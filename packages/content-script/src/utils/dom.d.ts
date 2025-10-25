@@ -6,29 +6,29 @@
  */
 export declare function isOnChannelVideosPage(): boolean;
 /**
- * Detect which layout YouTube is using
- */
-export declare function detectLayout(): 'rich' | 'grid' | null;
-/**
- * Get all video elements on the page
+ * Get all video elements on the page (unified for all layouts)
  */
 export declare function getVideoElements(): NodeListOf<Element>;
 /**
- * Find thumbnail container within a video element
+ * Find thumbnail container within a video element (works for all layouts)
  */
-export declare function findThumbnailContainer(element: Element, isRichLayout: boolean): Element | null;
+export declare function findThumbnailContainer(element: Element): Element | null;
 /**
- * Find title element within a video element
+ * Find title element within a video element (works for all layouts)
  */
-export declare function findTitleElement(element: Element, isRichLayout: boolean): HTMLAnchorElement | null;
+export declare function findTitleElement(element: Element): HTMLAnchorElement | null;
 /**
- * Find view count element within a video element
+ * Find title container for badge placement (works for all layouts)
  */
-export declare function findViewElement(element: Element, isRichLayout: boolean): Element | null;
+export declare function findTitleContainer(element: Element): Element | null;
+/**
+ * Find view count element within a video element (works for all layouts)
+ */
+export declare function findViewElement(element: Element): Element | null;
 /**
  * Extract title text from element
  */
-export declare function extractTitle(titleElement: Element, element: Element, isRichLayout: boolean): string;
+export declare function extractTitle(titleElement: Element, element: Element): string;
 /**
  * Get YouTube video ID from URL
  */

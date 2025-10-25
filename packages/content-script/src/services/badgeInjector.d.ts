@@ -3,6 +3,6 @@
  */
 import type { VideoWithScore } from '@core/types';
 /**
- * Inject badges into video thumbnails
+ * Inject badges at the start of video titles
  */
 export declare function injectBadges(videos: VideoWithScore[]): number;
