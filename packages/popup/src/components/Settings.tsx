@@ -1,19 +1,14 @@
-import { Icon } from './Icon';
+import { Section } from './ui/Section';
+import type { Theme } from '../hooks/useTheme';
 
 interface SettingsProps {
-  theme: 'light' | 'dark';
-  onThemeChange: (theme: 'light' | 'dark') => void;
+  theme: Theme;
+  onThemeChange: (theme: Theme) => void;
 }
 
 export function Settings({ theme, onThemeChange }: SettingsProps) {
   return (
-    <section className="section">
-      <div className="section-header section-header-static">
-        <Icon name="settings" className="section-icon" />
-        <h2 className="section-title">Settings</h2>
-      </div>
-
-      <div className="section-content expanded">
+    <Section icon="settings" title="Settings">
         <div className="settings-group">
           <div className="settings-item">
             <div className="settings-item-info">
@@ -51,8 +46,7 @@ export function Settings({ theme, onThemeChange }: SettingsProps) {
             </div>
           </div>
         </div>
-      </div>
-    </section>
+    </Section>
   );
 }
 

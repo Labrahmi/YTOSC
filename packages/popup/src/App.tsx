@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { StatsCard } from './components/StatsCard';
@@ -11,6 +10,8 @@ import { Icon } from './components/Icon';
 import { useLiveData } from './hooks/useLiveData';
 import { useFilters } from './hooks/useFilters';
 import { useFadeIn } from './hooks/useAnimations';
+import { useTheme } from './hooks/useTheme';
+import { useTabs } from './hooks/useTabs';
 
 const APP_VERSION = '1.0.0';
 
@@ -18,24 +19,8 @@ function App() {
   const { data, refresh } = useLiveData();
   const { activeFilter, setFilter, resetFilter, filteredVideos } = useFilters(data.videos);
   const fadeIn = useFadeIn(100);
-  const [activeTab, setActiveTab] = useState<'overview' | 'outliers' | 'settings'>('overview');
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-  }, []);
-
-  // Handle theme change
-  const handleThemeChange = (newTheme: 'light' | 'dark') => {
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
-  };
+  const { activeTab, setActiveTab } = useTabs('overview');
+  const { theme, toggleTheme } = useTheme();
 
   // Loading state
   if (data.isLoading) {
@@ -111,7 +96,7 @@ function App() {
         )}
 
         {activeTab === 'settings' && (
-          <Settings theme={theme} onThemeChange={handleThemeChange} />
+          <Settings theme={theme} onThemeChange={toggleTheme} />
         )}
       </main>
 

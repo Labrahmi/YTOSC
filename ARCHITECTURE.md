@@ -27,16 +27,33 @@ YTOSC/
 │   │       └── styles/          # CSS styles
 │   │           └── styles.ts    # Extension stylesheet
 │   │
-│   ├── popup/                   # Extension popup UI
+│   ├── popup/                   # Extension popup UI (React)
 │   │   └── src/
 │   │       ├── App.tsx          # Main app component
-│   │       ├── components/      # React components
+│   │       ├── components/      # Feature components
+│   │       │   ├── ui/          # Reusable UI primitives
+│   │       │   │   ├── Section.tsx      # Section wrapper
+│   │       │   │   └── IconButton.tsx   # Icon button
 │   │       │   ├── Header.tsx
 │   │       │   ├── Footer.tsx
-│   │       │   ├── InfoCard.tsx
-│   │       │   ├── ScoreLegend.tsx
-│   │       │   └── FeatureList.tsx
-│   │       └── index.css        # Popup styles
+│   │       │   ├── Tabs.tsx
+│   │       │   ├── StatsCard.tsx
+│   │       │   ├── FilterBar.tsx
+│   │       │   ├── FilteredStats.tsx
+│   │       │   ├── VideoList.tsx
+│   │       │   ├── VideoRow.tsx
+│   │       │   ├── Settings.tsx
+│   │       │   └── Icon.tsx
+│   │       ├── hooks/           # Custom React hooks
+│   │       │   ├── useLiveData.ts   # Channel data management
+│   │       │   ├── useFilters.ts    # Filter logic
+│   │       │   ├── useAnimations.ts # Animation utilities
+│   │       │   ├── useTheme.ts      # Theme management
+│   │       │   └── useTabs.ts       # Tab navigation
+│   │       ├── utils/           # Utility functions
+│   │       │   ├── formatters.ts    # Number/text formatting
+│   │       │   └── export.ts        # Data export logic
+│   │       └── index.css        # Global styles
 │   │
 │   ├── ui/                      # Shared UI component library
 │   │   └── src/
@@ -148,10 +165,49 @@ export const SELECTORS = {
 - **`analytics`**: Percentile, performance levels, analysis text
 
 ### Popup Package
-**Component-based React architecture**
-- Small, focused components
-- Props-based communication
-- No business logic (purely presentational)
+**Modern React architecture with separation of concerns**
+
+#### **Layered Architecture**
+```
+┌─────────────────────────────────────────┐
+│  App.tsx (Composition Layer)           │
+│  - Orchestrates hooks                   │
+│  - Manages global state                 │
+│  - Renders layouts                      │
+└─────────────────────────────────────────┘
+            │
+    ┌───────┼───────┬────────┐
+    ▼       ▼       ▼        ▼
+┌─────┐ ┌──────┐ ┌─────┐ ┌──────┐
+│Hooks│ │Comps │ │Utils│ │UI    │
+└─────┘ └──────┘ └─────┘ └──────┘
+```
+
+#### **Hooks Layer** (Business Logic)
+- `useLiveData`: Channel data fetching & state
+- `useFilters`: Video filtering logic
+- `useTheme`: Dark mode management & persistence
+- `useTabs`: Tab navigation state
+- `useAnimations`: Count-up & fade animations
+
+#### **Components Layer** (Features)
+- `StatsCard`: Channel overview statistics
+- `FilterBar`: Score filtering controls
+- `FilteredStats`: Filtered results summary
+- `VideoList`: Video display container
+- `VideoRow`: Individual video item
+- `Settings`: App settings panel
+- `Tabs`: Tab navigation
+- `Header`, `Footer`: Layout components
+
+#### **UI Primitives** (Reusable)
+- `Section`: Consistent section wrapper with header
+- `IconButton`: Reusable icon button component
+- `Icon`: SVG icon system
+
+#### **Utils Layer** (Pure Functions)
+- `formatters.ts`: Number formatting, score classification
+- `export.ts`: JSON export & download logic
 
 ## 🔄 Data Flow
 
@@ -260,14 +316,142 @@ test('extractVideos handles grid layout')
 ✅ **Flexibility**: Swap implementations without breaking others  
 ✅ **Discoverability**: New developers can navigate easily  
 
+## 🏛️ Popup Architecture Principles
+
+### **1. Separation of Concerns**
+- **Hooks** = Business logic & state management
+- **Components** = UI rendering & user interaction
+- **Utils** = Pure functions & data transformation
+- **UI Primitives** = Reusable building blocks
+
+### **2. Single Responsibility**
+Each module has ONE clear purpose:
+- `useTheme`: Theme state + localStorage sync
+- `formatters`: Pure data transformation
+- `Section`: Consistent section layout
+- `IconButton`: Reusable button primitive
+
+### **3. Composition Over Inheritance**
+```tsx
+// Instead of duplicating section structure
+<Section icon="chart" title="Overview">
+  <StatsGrid />
+</Section>
+
+// Compose primitives
+<IconButton icon="download" onClick={handleDownload} />
+```
+
+### **4. Type Safety**
+- Shared types exported from hooks
+- Strict TypeScript configuration
+- Interface-first design
+
+### **5. DRY (Don't Repeat Yourself)**
+- `formatNumber()` used across components
+- `getScoreClass()` centralized logic
+- `Section` component eliminates duplication
+
+## 📁 Folder Organization
+
+```
+popup/src/
+├── components/          # Feature components
+│   ├── ui/             # Reusable primitives
+│   ├── StatsCard.tsx   # Feature: Statistics display
+│   ├── FilterBar.tsx   # Feature: Filtering controls
+│   └── ...
+├── hooks/              # Custom hooks (state + logic)
+│   ├── useTheme.ts     # Theme management
+│   ├── useTabs.ts      # Tab navigation
+│   └── ...
+├── utils/              # Pure functions
+│   ├── formatters.ts   # Data formatting
+│   ├── export.ts       # Export logic
+│   └── ...
+├── App.tsx             # Composition root
+└── index.css           # Global styles
+```
+
+## 🔄 Data Flow (Popup)
+
+```
+1. User opens popup
+         │
+         ▼
+2. App.tsx initializes hooks
+         │
+         ├─→ useTheme() → Restores saved theme
+         ├─→ useTabs() → Sets initial tab
+         ├─→ useLiveData() → Fetches channel data
+         └─→ useFilters() → Prepares filter state
+         │
+         ▼
+3. App.tsx renders based on state
+         │
+         ├─→ activeTab === 'overview'
+         │         └─→ <StatsCard />
+         │
+         ├─→ activeTab === 'outliers'
+         │         ├─→ <FilteredStats />
+         │         ├─→ <FilterBar />
+         │         └─→ <VideoList />
+         │
+         └─→ activeTab === 'settings'
+                   └─→ <Settings />
+```
+
+## 🎯 Design Patterns Used
+
+### **1. Custom Hooks Pattern**
+Extract stateful logic into reusable hooks:
+```tsx
+// Before: Inline state management
+const [theme, setTheme] = useState('light');
+useEffect(() => { /* localStorage logic */ }, []);
+
+// After: Custom hook
+const { theme, toggleTheme } = useTheme();
+```
+
+### **2. Compound Component Pattern**
+Section component accepts children & actions:
+```tsx
+<Section icon="trending" title="Results" action={<IconButton />}>
+  <Content />
+</Section>
+```
+
+### **3. Presentation/Container Pattern**
+- **Container**: `App.tsx` (state & logic)
+- **Presentation**: Components (pure UI)
+
+### **4. Utility Functions Pattern**
+Pure functions for data transformation:
+```tsx
+// Pure, testable, reusable
+export function formatNumber(num: number): string { ... }
+export function getScoreClass(score: number): string { ... }
+```
+
+## 🧪 Benefits of This Architecture
+
+✅ **Reusability**: UI primitives used across components  
+✅ **Testability**: Pure functions easy to unit test  
+✅ **Maintainability**: Clear separation of concerns  
+✅ **Consistency**: Section component enforces uniform structure  
+✅ **Type Safety**: Shared types prevent errors  
+✅ **Scalability**: Easy to add new features  
+✅ **Developer Experience**: Clear mental model  
+
 ## 🚀 Future Improvements
 
-1. **Add unit tests** for critical functions
-2. **Extract i18n** into separate module
+1. **Add unit tests** for utils and hooks
+2. **Extract constants** into config file
 3. **Add error boundary** in popup
 4. **Create logger service** instead of console.log
 5. **Add performance monitoring** service
-6. **Create theme system** for colors
+6. **Implement context API** for deeply nested state
 
 ---
 

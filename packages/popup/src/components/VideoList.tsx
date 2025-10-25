@@ -21,7 +21,7 @@ export function VideoList({ videos, maxItems = 20 }: VideoListProps) {
     <div className="video-list-container">
       <div className="video-list">
         {displayVideos.map((video, index) => (
-          <VideoRow key={video.url || index} video={video} rank={index + 1} />
+          <VideoRow key={video.url || index} video={video} />
         ))}
       </div>
 

@@ -1,7 +1,7 @@
+import type { Theme } from '../hooks/useTheme';
 interface SettingsProps {
-  theme: 'light' | 'dark';
-  onThemeChange: (theme: 'light' | 'dark') => void;
+    theme: Theme;
+    onThemeChange: (theme: Theme) => void;
 }
-
 export declare function Settings({ theme, onThemeChange }: SettingsProps): import("react/jsx-runtime").JSX.Element;
-
+export {};

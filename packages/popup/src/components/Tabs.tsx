@@ -1,6 +1,8 @@
+import type { TabType } from '../hooks/useTabs';
+
 interface TabsProps {
-  activeTab: 'overview' | 'outliers' | 'settings';
-  onTabChange: (tab: 'overview' | 'outliers' | 'settings') => void;
+  activeTab: TabType;
+  onTabChange: (tab: TabType) => void;
   outliersCount: number;
 }
 
@@ -18,9 +20,9 @@ export function Tabs({ activeTab, onTabChange, outliersCount }: TabsProps) {
         onClick={() => onTabChange('outliers')}
       >
         Top Outliers
-        {/* {outliersCount > 0 && (
+        {outliersCount > 0 && (
           <span className="tab-badge">{outliersCount}</span>
-        )} */}
+        )}
       </button>
       <button
         className={`tab ${activeTab === 'settings' ? 'active' : ''}`}

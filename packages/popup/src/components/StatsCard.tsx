@@ -1,5 +1,6 @@
 import { useCountUp } from '../hooks/useAnimations';
-import { Icon } from './Icon';
+import { Section } from './ui/Section';
+import { formatNumber } from '../utils/formatters';
 
 interface StatsCardProps {
   totalVideos: number;
@@ -23,24 +24,8 @@ export function StatsCard({
   const animatedTotal = useCountUp(totalVideos, 600);
   const animatedMedian = useCountUp(medianViews, 700);
 
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`;
-    }
-    return num.toString();
-  };
-
   return (
-    <section className="section">
-      <div className="section-header section-header-static">
-        <Icon name="chart" className="section-icon" />
-        <h2 className="section-title">Channel Overview</h2>
-      </div>
-
-      <div className="section-content expanded">
+    <Section icon="chart" title="Channel Overview">
         <div className="stats-grid">
           <div className="stat-card">
             <div className="stat-label">Videos</div>
@@ -79,8 +64,7 @@ export function StatsCard({
             <span className="breakdown-label">Good</span>
           </div>
         </div>
-      </div>
-    </section>
+    </Section>
   );
 }
 

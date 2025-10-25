@@ -1,20 +1,12 @@
 import type { VideoWithScore } from '@core/types';
 import { Icon } from './Icon';
+import { getScoreClass } from '../utils/formatters';
 
 interface VideoRowProps {
   video: VideoWithScore;
-  rank: number;
 }
 
-export function VideoRow({ video, rank }: VideoRowProps) {
-  const getScoreClass = (score: number | null): string => {
-    if (score === null || score === undefined) return '';
-    if (score >= 10) return 'exceptional';
-    if (score >= 5) return 'excellent';
-    if (score >= 2) return 'good';
-    return '';
-  };
-
+export function VideoRow({ video }: VideoRowProps) {
   const handleClick = () => {
     if (video.url) {
       chrome.tabs.create({ url: video.url });

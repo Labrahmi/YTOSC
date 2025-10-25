@@ -1,5 +1,5 @@
 import type { FilterLevel } from '../hooks/useFilters';
-import { Icon } from './Icon';
+import { Section } from './ui/Section';
 
 interface FilterBarProps {
   activeFilter: FilterLevel;
@@ -14,13 +14,7 @@ interface FilterBarProps {
 
 export function FilterBar({ activeFilter, onFilterChange, onReset, counts }: FilterBarProps) {
   return (
-    <section className="section">
-      <div className="section-header section-header-static">
-        <Icon name="filter" className="section-icon" />
-        <h2 className="section-title">Filter Videos</h2>
-      </div>
-
-      <div className="section-content expanded">
+    <Section icon="filter" title="Filter Videos">
         <div className="filter-buttons">
           <button
             className={`filter-btn filter-good ${activeFilter === 2 ? 'active' : ''}`}
@@ -51,11 +45,10 @@ export function FilterBar({ activeFilter, onFilterChange, onReset, counts }: Fil
             onClick={onReset}
             title="Show all videos"
           >
-            All
-          </button>
-        </div>
+          All
+        </button>
       </div>
-    </section>
+    </Section>
   );
 }
 

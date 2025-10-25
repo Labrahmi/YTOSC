@@ -585,10 +585,10 @@ html {
 }
 
 /* ========================================
-   Download Button
+   Icon Button - Reusable Component
    ======================================== */
 
-.download-btn {
+.icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -602,32 +602,32 @@ html {
   padding: 0;
 }
 
-.download-btn:hover {
+.icon-btn:hover {
   background: var(--bg-hover);
   border-color: var(--border-strong);
 }
 
-.download-btn:active {
+.icon-btn:active {
   transform: scale(0.95);
 }
 
-.download-btn:focus-visible {
+.icon-btn:focus-visible {
   outline: 2px solid var(--text-primary);
   outline-offset: 2px;
 }
 
-[data-theme='dark'] .download-btn:focus-visible {
+[data-theme='dark'] .icon-btn:focus-visible {
   outline-color: var(--yt-red);
 }
 
-.download-icon {
+.icon-btn-icon {
   width: 16px;
   height: 16px;
   color: var(--text-secondary);
   transition: color var(--transition-fast);
 }
 
-.download-btn:hover .download-icon {
+.icon-btn:hover .icon-btn-icon {
   color: var(--text-primary);
 }
 
