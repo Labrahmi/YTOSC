@@ -15,10 +15,12 @@ interface FilterBarProps {
 export function FilterBar({ activeFilter, onFilterChange, onReset, counts }: FilterBarProps) {
   return (
     <section className="section">
-      <div className="section-header">
+      <div className="section-header" style={{ cursor: 'default' }}>
         <Icon name="filter" className="section-icon" />
         <h2 className="section-title">Filter Videos</h2>
       </div>
+
+      <div className="section-content expanded">
 
       <div className="filter-buttons">
         <button
@@ -52,6 +54,8 @@ export function FilterBar({ activeFilter, onFilterChange, onReset, counts }: Fil
         >
           All
         </button>
+      </div>
+
       </div>
     </section>
   );

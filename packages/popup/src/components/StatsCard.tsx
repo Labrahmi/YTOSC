@@ -35,10 +35,12 @@ export function StatsCard({
 
   return (
     <section className="section">
-      <div className="section-header">
+      <div className="section-header" style={{ cursor: 'default' }}>
         <Icon name="chart" className="section-icon" />
         <h2 className="section-title">Channel Overview</h2>
       </div>
+
+      <div className="section-content expanded">
 
       <div className="stats-grid">
         <div className="stat-card">
@@ -77,6 +79,8 @@ export function StatsCard({
           <span className="breakdown-count good">{goodCount}</span>
           <span className="breakdown-label">Good</span>
         </div>
+      </div>
+
       </div>
     </section>
   );

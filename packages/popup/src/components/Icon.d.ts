@@ -1,7 +1,6 @@
 interface IconProps {
-  name: 'chart' | 'filter' | 'trending' | 'info' | 'alert';
+  name: 'chart' | 'filter' | 'trending' | 'info' | 'alert' | 'chevron-down' | 'youtube';
   className?: string;
 }
 
-export function Icon({ name, className }: IconProps): JSX.Element;
-
+export declare function Icon({ name, className }: IconProps): import("react/jsx-runtime").JSX.Element;

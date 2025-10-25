@@ -1,6 +1,1 @@
-interface HeaderProps {
-    title: string;
-    subtitle: string;
-}
-export declare function Header({ title, subtitle }: HeaderProps): import("react/jsx-runtime").JSX.Element;
-export {};
+export declare function Header(): import("react/jsx-runtime").JSX.Element;

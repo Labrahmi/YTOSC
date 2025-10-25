@@ -1,13 +1,9 @@
-interface HeaderProps {
-  title: string;
-  subtitle: string;
-}
-
-export function Header({ title, subtitle }: HeaderProps) {
+export function Header() {
   return (
     <header className="header">
-      <h1>{title}</h1>
-      <p className="subtitle">{subtitle}</p>
+      <h1>
+        <span className="yt-accent">Outlier</span> Score
+      </h1>
     </header>
   );
 }
