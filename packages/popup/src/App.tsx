@@ -1,104 +1,44 @@
-import { useState } from 'react';
-import { Button } from '@ui/Button';
-import type { FilterMessage } from '@core/types';
-
-type FilterLevel = 2 | 5 | 10 | null;
-
 function App() {
-  const [activeFilter, setActiveFilter] = useState<FilterLevel>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const sendMessageToContentScript = async (message: FilterMessage) => {
-    try {
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
-      if (!tab.id) {
-        console.error('No active tab found');
-        return;
-      }
-
-      await chrome.tabs.sendMessage(tab.id, message);
-    } catch (error) {
-      console.error('Error sending message to content script:', error);
-    }
-  };
-
-  const handleFilterClick = async (level: FilterLevel) => {
-    if (level === null) return;
-    
-    setIsLoading(true);
-    setActiveFilter(level);
-    
-    await sendMessageToContentScript({
-      type: 'SET_FILTER',
-      threshold: level,
-    });
-    
-    setIsLoading(false);
-    console.log(`Filter activated: ${level}x`);
-  };
-
-  const handleReset = async () => {
-    setIsLoading(true);
-    setActiveFilter(null);
-    
-    await sendMessageToContentScript({
-      type: 'RESET_FILTER',
-    });
-    
-    setIsLoading(false);
-    console.log('Filter reset');
-  };
-
   return (
     <div className="app">
       <header className="header">
         <h1>YouTube Outlier Score</h1>
-        <p className="subtitle">Filter videos by their outlier score</p>
+        <p className="subtitle">Analyze video performance on channel pages</p>
       </header>
 
       <main className="main">
-        <div className="filter-section">
-          <h2>Filter by Score</h2>
-          <div className="filter-buttons">
-            <Button
-              variant={activeFilter === 2 ? 'primary' : 'secondary'}
-              onClick={() => handleFilterClick(2)}
-              disabled={isLoading}
-            >
-              &gt; 2x
-            </Button>
-            <Button
-              variant={activeFilter === 5 ? 'primary' : 'secondary'}
-              onClick={() => handleFilterClick(5)}
-              disabled={isLoading}
-            >
-              &gt; 5x
-            </Button>
-            <Button
-              variant={activeFilter === 10 ? 'primary' : 'secondary'}
-              onClick={() => handleFilterClick(10)}
-              disabled={isLoading}
-            >
-              &gt; 10x
-            </Button>
+        <div className="info-section">
+          <div className="info-card">
+            <h2>🎯 How It Works</h2>
+            <p>
+              The extension automatically calculates and displays outlier scores 
+              for each video on YouTube channel pages.
+            </p>
           </div>
-        </div>
 
-        <div className="reset-section">
-          <Button 
-            variant="outline" 
-            onClick={handleReset} 
-            fullWidth
-            disabled={isLoading}
-          >
-            Reset Filter
-          </Button>
+          <div className="info-card">
+            <h2>🏆 Score Levels</h2>
+            <ul>
+              <li><strong style={{color: '#F44336'}}>Red (≥10x)</strong> - Exceptional</li>
+              <li><strong style={{color: '#FF9800'}}>Orange (≥5x)</strong> - Excellent</li>
+              <li><strong style={{color: '#FFEB3B'}}>Yellow (≥2x)</strong> - Good</li>
+              <li><strong style={{color: '#9E9E9E'}}>Gray (&lt;2x)</strong> - Average</li>
+            </ul>
+          </div>
+
+          <div className="info-card">
+            <h2>💡 Features</h2>
+            <ul>
+              <li>Click any badge for detailed analytics</li>
+              <li>Automatic score updates on scroll</li>
+              <li>Works on all YouTube channel pages</li>
+            </ul>
+          </div>
         </div>
       </main>
 
       <footer className="footer">
-        <p>v1.0.0</p>
+        <p>YouTube Outlier Score Calculator v1.0.0</p>
       </footer>
     </div>
   );
