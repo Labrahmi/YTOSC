@@ -1,8 +1,6 @@
 // Test setup file for vitest
 // Add any global test configuration here
 
-import { expect } from 'vitest';
-
 // Custom matchers can be added here if needed
 // Example:
 // expect.extend({
