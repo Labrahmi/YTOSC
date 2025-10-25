@@ -55,6 +55,9 @@ export function showAnalyticsModal(video: VideoWithScore) {
     medianViews
   );
   
+  // Disable page scroll
+  disableBodyScroll();
+  
   // Add to page
   document.body.appendChild(overlay);
   
@@ -181,24 +184,50 @@ function createAnalysisSection(
  * Setup modal event handlers
  */
 function setupModalEventHandlers(overlay: HTMLElement) {
+  const closeModal = () => {
+    overlay.remove();
+    enableBodyScroll();
+  };
+  
   // Close button
   const closeBtn = overlay.querySelector('.ytosc-modal-close');
-  closeBtn?.addEventListener('click', () => overlay.remove());
+  closeBtn?.addEventListener('click', closeModal);
   
   // Click outside to close
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) {
-      overlay.remove();
+      closeModal();
     }
   });
   
   // ESC key to close
   const handleEscape = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      overlay.remove();
+      closeModal();
       document.removeEventListener('keydown', handleEscape);
     }
   };
   document.addEventListener('keydown', handleEscape);
+}
+
+/**
+ * Disable body scroll when modal is open
+ */
+function disableBodyScroll() {
+  // Save current overflow state
+  const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.overflow = 'hidden';
+  // Prevent layout shift by adding padding to compensate for scrollbar
+  if (scrollbarWidth > 0) {
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+  }
+}
+
+/**
+ * Re-enable body scroll when modal is closed
+ */
+function enableBodyScroll() {
+  document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
 }
 

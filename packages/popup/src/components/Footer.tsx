@@ -5,7 +5,7 @@ interface FooterProps {
 export function Footer({ version }: FooterProps) {
   return (
     <footer className="footer">
-      <p>YouTube Outlier Score Calculator v{version}</p>
+      <p>ℹ️  Data updates automatically from current tab · v{version}</p>
     </footer>
   );
 }

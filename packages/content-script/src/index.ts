@@ -131,6 +131,74 @@ function initUrlObserver(): void {
 }
 
 /**
+ * Message listener for popup communication
+ */
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === 'GET_CHANNEL_DATA') {
+    // Check if we're on a channel page
+    if (!isOnChannelVideosPage()) {
+      sendResponse({
+        error: 'Not on a YouTube channel page',
+        videos: null,
+        medianViews: null,
+      });
+      return true;
+    }
+
+    // Return current video data with scores
+    if (currentVideos.length > 0) {
+      const validVideos = currentVideos.filter(v => v.viewCount !== null && v.viewCount !== undefined);
+      const viewCounts = validVideos.map(v => v.viewCount!);
+      const medianViews = viewCounts.length > 0 ? calculateMedian(viewCounts) : 0;
+
+      sendResponse({
+        videos: currentVideos,
+        medianViews,
+        error: null,
+      });
+    } else {
+      // No videos extracted yet, try to extract now
+      const videos = extractVideos();
+      if (videos.length > 0) {
+        const videosWithScores = calculateChannelOutlierScores(videos);
+        currentVideos = videosWithScores;
+
+        const validVideos = videosWithScores.filter(v => v.viewCount !== null && v.viewCount !== undefined);
+        const viewCounts = validVideos.map(v => v.viewCount!);
+        const medianViews = viewCounts.length > 0 ? calculateMedian(viewCounts) : 0;
+
+        sendResponse({
+          videos: videosWithScores,
+          medianViews,
+          error: null,
+        });
+      } else {
+        sendResponse({
+          error: 'No videos found. Please wait for the page to load.',
+          videos: null,
+          medianViews: null,
+        });
+      }
+    }
+
+    return true; // Keep the message channel open for async response
+  }
+});
+
+/**
+ * Helper function to calculate median
+ */
+function calculateMedian(numbers: number[]): number {
+  if (numbers.length === 0) return 0;
+  const sorted = [...numbers].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    return (sorted[middle - 1] + sorted[middle]) / 2;
+  }
+  return sorted[middle];
+}
+
+/**
  * Initialize the content script
  */
 function init(): void {
