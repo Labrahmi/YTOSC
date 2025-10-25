@@ -1,0 +1,11 @@
+{
+  "name": "@ytosc/core",
+  "version": "1.0.0",
+  "description": "Core business logic for YouTube Outlier Score Calculator",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@ytosc/ui",
+  "version": "1.0.0",
+  "description": "Shared React component library",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1"
+  }
+}

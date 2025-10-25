@@ -1,0 +1,55 @@
+.ytosc-button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+  font-family: inherit;
+}
+
+.ytosc-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ytosc-button--primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+}
+
+.ytosc-button--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.ytosc-button--primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ytosc-button--secondary {
+  background: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.ytosc-button--secondary:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.ytosc-button--outline {
+  background: transparent;
+  color: #667eea;
+  border: 1px solid #667eea;
+}
+
+.ytosc-button--outline:hover:not(:disabled) {
+  background: #f5f3ff;
+}
+
+.ytosc-button--full-width {
+  width: 100%;
+}

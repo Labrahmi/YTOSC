@@ -1,0 +1,13 @@
+{
+  "name": "@ytosc/content-script",
+  "version": "1.0.0",
+  "description": "Content script for YouTube DOM interaction",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ytosc/core": "*"
+  }
+}

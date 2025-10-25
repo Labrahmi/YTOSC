@@ -1,0 +1,10 @@
+{
+  "name": "@ytosc/background",
+  "version": "1.0.0",
+  "description": "Background service worker",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  }
+}

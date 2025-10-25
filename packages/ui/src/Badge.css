@@ -1,0 +1,37 @@
+.ytosc-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-right: 6px;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.ytosc-badge--gold {
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #7C2D12;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.ytosc-badge--silver {
+  background: linear-gradient(135deg, #E8E8E8 0%, #BFBFBF 100%);
+  color: #1F2937;
+  border: 1px solid rgba(192, 192, 192, 0.3);
+}
+
+.ytosc-badge--bronze {
+  background: linear-gradient(135deg, #E6A85C 0%, #CD7F32 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(205, 127, 50, 0.3);
+}
+
+.ytosc-badge--default {
+  background: linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%);
+  color: #6B7280;
+  border: 1px solid rgba(209, 213, 219, 0.3);
+}
