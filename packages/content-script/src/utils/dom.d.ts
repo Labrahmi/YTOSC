@@ -34,6 +34,14 @@ export declare function extractTitle(titleElement: Element, element: Element): s
  */
 export declare function getVideoIdFromUrl(url: string): string | null;
 /**
+ * Find the container where YouTube filter chips are located
+ */
+export declare function findFilterChipContainer(): Element | null;
+/**
+ * Find the primary content area where filters should be injected
+ */
+export declare function findPrimaryContentArea(): Element | null;
+/**
  * Get thumbnail URL from video URL
  */
 export declare function getThumbnailUrl(videoUrl: string): string;

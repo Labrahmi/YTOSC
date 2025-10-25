@@ -15,6 +15,7 @@ import { TIMINGS, SELECTORS } from './constants';
 import { isOnChannelVideosPage } from './utils/dom';
 import { extractVideos } from './services/videoExtractor';
 import { injectBadges } from './services/badgeInjector';
+import { injectFilterContainer } from './services/filterInjector';
 import { setCurrentVideos } from './components/modal';
 import { injectStyles } from './styles/styles';
 
@@ -33,34 +34,37 @@ function injectOutlierScores(): void {
   if (!isOnChannelVideosPage()) {
     return;
   }
-  
+
   // Inject styles first
   injectStyles();
-  
+
+  // Inject filter container
+  injectFilterContainer();
+
   // Extract video data
   const videos = extractVideos();
-  
+
   if (videos.length === 0) {
     console.log('⚠️ No videos found on page');
     return;
   }
-  
+
   // Calculate outlier scores
   currentVideos = calculateChannelOutlierScores(videos);
-  
+
   // Share with modal component
   setCurrentVideos(currentVideos);
-  
+
   // Get score statistics
   const videosWithScores = currentVideos.filter(v => v.outlierScore !== null);
   const scores = videosWithScores.map(v => v.outlierScore!);
   const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
   const maxScore = scores.length > 0 ? Math.max(...scores) : 0;
   const highScores = videosWithScores.filter(v => v.outlierScore! >= 2).length;
-  
+
   // Inject badges into the DOM
   const badgesInjected = injectBadges(currentVideos);
-  
+
   // Summary log with insights
   console.log(
     `✅ YTOSC: ${videos.length} videos analyzed | ` +

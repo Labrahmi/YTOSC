@@ -102,6 +102,55 @@ export function getVideoIdFromUrl(url: string): string | null {
 }
 
 /**
+ * Find the container where YouTube filter chips are located
+ */
+export function findFilterChipContainer(): Element | null {
+  // Try different possible selectors for YouTube's filter chip container
+  const selectors = [
+    'ytd-feed-filter-chip-bar-renderer #chips-content',
+    'ytd-feed-filter-chip-bar #chips-content',
+    '#chips-content',
+    'ytd-feed-filter-chip-bar-renderer',
+    'ytd-feed-filter-chip-bar',
+    '#filter-chip-bar',
+    '.filter-chip-bar',
+    'ytd-rich-grid-renderer #filter-chip-bar',
+    'ytd-two-column-browse-results-renderer #filter-chip-bar'
+  ];
+
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element) {
+      return element;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Find the primary content area where filters should be injected
+ */
+export function findPrimaryContentArea(): Element | null {
+  // Try to find the main content area for channel pages
+  const selectors = [
+    'ytd-rich-grid-renderer',
+    'ytd-two-column-browse-results-renderer',
+    '#primary',
+    '#contents'
+  ];
+
+  for (const selector of selectors) {
+    const element = document.querySelector(selector);
+    if (element) {
+      return element;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Get thumbnail URL from video URL
  */
 export function getThumbnailUrl(videoUrl: string): string {

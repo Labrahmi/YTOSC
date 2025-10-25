@@ -12,6 +12,83 @@ export const EXTENSION_STYLES = `
     line-height: 1.4;
   }
 
+  /* YouTube chips container centering */
+  #chips-content, ytd-feed-filter-chip-bar-renderer #chips-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 8px;
+  }
+
+  /* Filter Chips Container */
+  .ytosc-filter-container {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-left: auto;
+    padding-left: 16px;
+  }
+
+  /* Individual Filter Chip */
+  .ytosc-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  /* Filter Chip Button */
+  .ytosc-filter-chip-button {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    background-color: #065fd4;
+    color: #ffffff;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    font-family: 'Roboto', 'Arial', sans-serif;
+  }
+
+  .ytosc-filter-chip-button:hover {
+    background-color: #0d7df7;
+  }
+
+  /* Active Filter Chip */
+  .ytosc-filter-chip--active .ytosc-filter-chip-button {
+    background-color: #1a73e8;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
+  }
+
+  .ytosc-filter-chip--active:hover .ytosc-filter-chip-button {
+    background-color: #1557b0;
+  }
+
+  /* Clear Filter Chip (Red) */
+  .ytosc-filter-chip--clear .ytosc-filter-chip-button {
+    background-color: #dc2626;
+    color: #ffffff;
+  }
+
+  .ytosc-filter-chip--clear:hover .ytosc-filter-chip-button {
+    background-color: #ef4444;
+  }
+
+  .ytosc-filter-chip--clear.ytosc-filter-chip--active .ytosc-filter-chip-button {
+    background-color: #b91c1c;
+    box-shadow: 0 2px 8px rgba(185, 28, 28, 0.3);
+  }
+
+  .ytosc-filter-chip--clear.ytosc-filter-chip--active:hover .ytosc-filter-chip-button {
+    background-color: #991b1b;
+  }
+
   /* Badge positioning within titles */
   .ytosc-badge {
     display: inline-flex;

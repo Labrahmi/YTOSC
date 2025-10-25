@@ -50,5 +50,20 @@ export const BADGE_CLASSES = {
   DEFAULT: 'ytosc-badge--default',
 } as const;
 
+export const FILTER_SELECTORS = {
+  CONTAINER: '#ytosc-filter-container',
+  CHIP: '.ytosc-filter-chip',
+  CHIP_ACTIVE: '.ytosc-filter-chip--active',
+  CHIP_BUTTON: '.ytosc-filter-chip-button',
+} as const;
+
+export const FILTER_CLASSES = {
+  CONTAINER: 'ytosc-filter-container',
+  CHIP: 'ytosc-filter-chip',
+  CHIP_ACTIVE: 'ytosc-filter-chip--active',
+  CHIP_BUTTON: 'ytosc-filter-chip-button',
+  CHIP_CLEAR: 'ytosc-filter-chip--clear',
+} as const;
+
 export const STYLE_ID = 'ytosc-styles';
 

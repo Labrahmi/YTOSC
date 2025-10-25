@@ -41,4 +41,17 @@ export declare const BADGE_CLASSES: {
     readonly BRONZE: "ytosc-badge--bronze";
     readonly DEFAULT: "ytosc-badge--default";
 };
+export declare const FILTER_SELECTORS: {
+    readonly CONTAINER: "#ytosc-filter-container";
+    readonly CHIP: ".ytosc-filter-chip";
+    readonly CHIP_ACTIVE: ".ytosc-filter-chip--active";
+    readonly CHIP_BUTTON: ".ytosc-filter-chip-button";
+};
+export declare const FILTER_CLASSES: {
+    readonly CONTAINER: "ytosc-filter-container";
+    readonly CHIP: "ytosc-filter-chip";
+    readonly CHIP_ACTIVE: "ytosc-filter-chip--active";
+    readonly CHIP_BUTTON: "ytosc-filter-chip-button";
+    readonly CHIP_CLEAR: "ytosc-filter-chip--clear";
+};
 export declare const STYLE_ID = "ytosc-styles";
