@@ -1,4 +1,5 @@
 import type { FilterLevel } from '../hooks/useFilters';
+import { Icon } from './Icon';
 
 interface FilterBarProps {
   activeFilter: FilterLevel;
@@ -13,48 +14,46 @@ interface FilterBarProps {
 
 export function FilterBar({ activeFilter, onFilterChange, onReset, counts }: FilterBarProps) {
   return (
-    <div className="filter-section">
-      <div className="filter-header">
-        <span className="filter-icon">🎯</span>
-        <h2>Filter Videos</h2>
+    <section className="section">
+      <div className="section-header">
+        <Icon name="filter" className="section-icon" />
+        <h2 className="section-title">Filter Videos</h2>
       </div>
 
       <div className="filter-buttons">
         <button
           className={`filter-btn filter-good ${activeFilter === 2 ? 'active' : ''}`}
           onClick={() => onFilterChange(2)}
-          title={`${counts.good} videos with score ≥2×`}
+          title={`Good: ${counts.good} videos with score ≥2×`}
         >
-          <span className="filter-threshold">≥2×</span>
-          <span className="filter-label">Good</span>
+          ≥2×
         </button>
 
         <button
           className={`filter-btn filter-excellent ${activeFilter === 5 ? 'active' : ''}`}
           onClick={() => onFilterChange(5)}
-          title={`${counts.excellent} videos with score ≥5×`}
+          title={`Excellent: ${counts.excellent} videos with score ≥5×`}
         >
-          <span className="filter-threshold">≥5×</span>
-          <span className="filter-label">Excellent</span>
+          ≥5×
         </button>
 
         <button
           className={`filter-btn filter-exceptional ${activeFilter === 10 ? 'active' : ''}`}
           onClick={() => onFilterChange(10)}
-          title={`${counts.exceptional} videos with score ≥10×`}
+          title={`Exceptional: ${counts.exceptional} videos with score ≥10×`}
         >
-          <span className="filter-threshold">≥10×</span>
-          <span className="filter-label">Exceptional</span>
+          ≥10×
         </button>
 
         <button
           className={`filter-btn filter-reset ${activeFilter === null ? 'active' : ''}`}
           onClick={onReset}
+          title="Show all videos"
         >
-          <span className="filter-label">Reset</span>
+          All
         </button>
       </div>
-    </div>
+    </section>
   );
 }
 

@@ -1,5 +1,6 @@
 import type { VideoWithScore } from '@core/types';
 import { VideoRow } from './VideoRow';
+import { Icon } from './Icon';
 
 interface VideoListProps {
   videos: VideoWithScore[];
@@ -11,24 +12,24 @@ export function VideoList({ videos, maxItems = 10 }: VideoListProps) {
 
   if (videos.length === 0) {
     return (
-      <div className="video-list-section">
-        <div className="video-list-header">
-          <span className="video-list-icon">📈</span>
-          <h2>Top Results</h2>
+      <section className="section">
+        <div className="section-header">
+          <Icon name="trending" className="section-icon" />
+          <h2 className="section-title">Top Outliers</h2>
         </div>
         <div className="video-list-empty">
           <p>No videos found matching your filter.</p>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="video-list-section">
-      <div className="video-list-header">
-        <span className="video-list-icon">📈</span>
-        <h2>Top Results</h2>
-        <span className="video-count">({videos.length} videos)</span>
+    <section className="section">
+      <div className="section-header">
+        <Icon name="trending" className="section-icon" />
+        <h2 className="section-title">Top Outliers</h2>
+        <span className="section-count">{videos.length}</span>
       </div>
 
       <div className="video-list">
@@ -42,7 +43,7 @@ export function VideoList({ videos, maxItems = 10 }: VideoListProps) {
           +{videos.length - maxItems} more videos
         </div>
       )}
-    </div>
+    </section>
   );
 }
 

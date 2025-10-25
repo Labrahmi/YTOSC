@@ -3,6 +3,7 @@ import { Footer } from './components/Footer';
 import { StatsCard } from './components/StatsCard';
 import { FilterBar } from './components/FilterBar';
 import { VideoList } from './components/VideoList';
+import { Icon } from './components/Icon';
 import { useLiveData } from './hooks/useLiveData';
 import { useFilters } from './hooks/useFilters';
 import { useFadeIn } from './hooks/useAnimations';
@@ -39,7 +40,7 @@ function App() {
           subtitle="Analyze your video performance" 
         />
         <div className="error-container">
-          <div className="error-icon">⚠️</div>
+          <Icon name="alert" className="error-icon" />
           <p className="error-message">{data.error}</p>
           <p className="error-hint">
             Visit a YouTube channel's Videos tab to see analytics.

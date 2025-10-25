@@ -30,11 +30,11 @@ export function VideoRow({ video, rank }: VideoRowProps) {
 
   return (
     <div className="video-row" onClick={handleClick} title={video.title}>
-      <div className="video-rank">{rank}.</div>
+      <div className="video-rank">{rank}</div>
       <div className={`video-score ${scoreClass}`}>
         {score !== null && score !== undefined ? `${score.toFixed(1)}×` : 'N/A'}
       </div>
-      <div className="video-divider">|</div>
+      <span className="video-divider">|</span>
       <div className="video-title">{truncateTitle(video.title)}</div>
     </div>
   );

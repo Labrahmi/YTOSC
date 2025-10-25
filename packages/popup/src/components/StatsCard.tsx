@@ -1,4 +1,5 @@
 import { useCountUp } from '../hooks/useAnimations';
+import { Icon } from './Icon';
 
 interface StatsCardProps {
   totalVideos: number;
@@ -33,51 +34,51 @@ export function StatsCard({
   };
 
   return (
-    <div className="stats-card">
-      <div className="stats-card-header">
-        <span className="stats-card-icon">🔹</span>
-        <h2>Live Channel Snapshot</h2>
+    <section className="section">
+      <div className="section-header">
+        <Icon name="chart" className="section-icon" />
+        <h2 className="section-title">Channel Overview</h2>
       </div>
 
       <div className="stats-grid">
-        <div className="stat-item">
-          <div className="stat-label">Videos analyzed</div>
+        <div className="stat-card">
+          <div className="stat-label">Videos</div>
           <div className="stat-value">{animatedTotal}</div>
         </div>
 
-        <div className="stat-item">
-          <div className="stat-label">Median views</div>
+        <div className="stat-card">
+          <div className="stat-label">Median Views</div>
           <div className="stat-value">{formatNumber(animatedMedian)}</div>
         </div>
 
-        <div className="stat-item">
-          <div className="stat-label">Top outlier</div>
+        <div className="stat-card">
+          <div className="stat-label">Top Outlier</div>
           <div className="stat-value stat-highlight">{topScore.toFixed(1)}×</div>
         </div>
 
-        <div className="stat-item">
-          <div className="stat-label">Avg score</div>
+        <div className="stat-card">
+          <div className="stat-label">Avg Score</div>
           <div className="stat-value">{avgScore.toFixed(1)}×</div>
         </div>
       </div>
 
       <div className="stats-breakdown">
         <div className="breakdown-item">
-          <span className="breakdown-label exceptional">Exceptional</span>
-          <span className="breakdown-count">{exceptionalCount}</span>
+          <span className="breakdown-count exceptional">{exceptionalCount}</span>
+          <span className="breakdown-label">Exceptional</span>
         </div>
-        <div className="breakdown-divider">|</div>
+        <span className="pipe-divider">|</span>
         <div className="breakdown-item">
-          <span className="breakdown-label excellent">Excellent</span>
-          <span className="breakdown-count">{excellentCount}</span>
+          <span className="breakdown-count excellent">{excellentCount}</span>
+          <span className="breakdown-label">Excellent</span>
         </div>
-        <div className="breakdown-divider">|</div>
+        <span className="pipe-divider">|</span>
         <div className="breakdown-item">
-          <span className="breakdown-label good">Good</span>
-          <span className="breakdown-count">{goodCount}</span>
+          <span className="breakdown-count good">{goodCount}</span>
+          <span className="breakdown-label">Good</span>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

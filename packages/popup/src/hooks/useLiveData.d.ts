@@ -1,16 +1,4 @@
 import type { VideoWithScore } from '@core/types';
-/**
- * Fallback mock data for development mode when Chrome API is not available
- */
-declare function getMockData(): Promise<{
-    videos: {
-        title: string;
-        viewCount: number;
-        url: string;
-        outlierScore: number;
-    }[];
-    medianViews: number;
-}>;
 export interface LiveData {
     videos: VideoWithScore[];
     totalVideos: number;
@@ -30,4 +18,3 @@ export declare function useLiveData(): {
     data: LiveData;
     refresh: () => Promise<void>;
 };
-export {};

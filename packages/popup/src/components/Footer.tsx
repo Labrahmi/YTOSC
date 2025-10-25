@@ -1,3 +1,5 @@
+import { Icon } from './Icon';
+
 interface FooterProps {
   version: string;
 }
@@ -5,7 +7,10 @@ interface FooterProps {
 export function Footer({ version }: FooterProps) {
   return (
     <footer className="footer">
-      <p>ℹ️  Data updates automatically from current tab · v{version}</p>
+      <p className="footer-content">
+        <Icon name="info" className="footer-icon" />
+        <span>Data updates automatically from current tab · v{version}</span>
+      </p>
     </footer>
   );
 }
