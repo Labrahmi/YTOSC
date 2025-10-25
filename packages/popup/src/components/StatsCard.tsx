@@ -35,52 +35,50 @@ export function StatsCard({
 
   return (
     <section className="section">
-      <div className="section-header" style={{ cursor: 'default' }}>
+      <div className="section-header section-header-static">
         <Icon name="chart" className="section-icon" />
         <h2 className="section-title">Channel Overview</h2>
       </div>
 
       <div className="section-content expanded">
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-label">Videos</div>
+            <div className="stat-value">{animatedTotal}</div>
+          </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label">Videos</div>
-          <div className="stat-value">{animatedTotal}</div>
+          <div className="stat-card">
+            <div className="stat-label">Median Views</div>
+            <div className="stat-value">{formatNumber(animatedMedian)}</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Top Outlier</div>
+            <div className="stat-value stat-highlight">{topScore.toFixed(1)}×</div>
+          </div>
+
+          <div className="stat-card">
+            <div className="stat-label">Avg Score</div>
+            <div className="stat-value">{avgScore.toFixed(1)}×</div>
+          </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-label">Median Views</div>
-          <div className="stat-value">{formatNumber(animatedMedian)}</div>
+        <div className="stats-breakdown">
+          <div className="breakdown-item">
+            <span className="breakdown-count exceptional">{exceptionalCount}</span>
+            <span className="breakdown-label">Exceptional</span>
+          </div>
+          <span className="pipe-divider">|</span>
+          <div className="breakdown-item">
+            <span className="breakdown-count excellent">{excellentCount}</span>
+            <span className="breakdown-label">Excellent</span>
+          </div>
+          <span className="pipe-divider">|</span>
+          <div className="breakdown-item">
+            <span className="breakdown-count good">{goodCount}</span>
+            <span className="breakdown-label">Good</span>
+          </div>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-label">Top Outlier</div>
-          <div className="stat-value stat-highlight">{topScore.toFixed(1)}×</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-label">Avg Score</div>
-          <div className="stat-value">{avgScore.toFixed(1)}×</div>
-        </div>
-      </div>
-
-      <div className="stats-breakdown">
-        <div className="breakdown-item">
-          <span className="breakdown-count exceptional">{exceptionalCount}</span>
-          <span className="breakdown-label">Exceptional</span>
-        </div>
-        <span className="pipe-divider">|</span>
-        <div className="breakdown-item">
-          <span className="breakdown-count excellent">{excellentCount}</span>
-          <span className="breakdown-label">Excellent</span>
-        </div>
-        <span className="pipe-divider">|</span>
-        <div className="breakdown-item">
-          <span className="breakdown-count good">{goodCount}</span>
-          <span className="breakdown-label">Good</span>
-        </div>
-      </div>
-
       </div>
     </section>
   );

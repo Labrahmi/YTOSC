@@ -1,5 +1,5 @@
 interface IconProps {
-  name: 'chart' | 'filter' | 'trending' | 'info' | 'alert' | 'chevron-down' | 'youtube';
+  name: 'chart' | 'filter' | 'trending' | 'info' | 'alert' | 'chevron-down' | 'youtube' | 'settings' | 'download';
   className?: string;
 }
 

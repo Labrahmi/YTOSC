@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { StatsCard } from './components/StatsCard';
 import { FilterBar } from './components/FilterBar';
 import { VideoList } from './components/VideoList';
+import { FilteredStats } from './components/FilteredStats';
+import { Settings } from './components/Settings';
 import { Tabs } from './components/Tabs';
 import { Icon } from './components/Icon';
 import { useLiveData } from './hooks/useLiveData';
@@ -16,7 +18,24 @@ function App() {
   const { data, refresh } = useLiveData();
   const { activeFilter, setFilter, resetFilter, filteredVideos } = useFilters(data.videos);
   const fadeIn = useFadeIn(100);
-  const [activeTab, setActiveTab] = useState<'overview' | 'outliers'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'outliers' | 'settings'>('overview');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  }, []);
+
+  // Handle theme change
+  const handleThemeChange = (newTheme: 'light' | 'dark') => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+  };
 
   // Loading state
   if (data.isLoading) {
@@ -62,7 +81,7 @@ function App() {
       />
 
       <main className="main">
-        {activeTab === 'overview' ? (
+        {activeTab === 'overview' && (
           <StatsCard
             totalVideos={data.totalVideos}
             medianViews={data.medianViews}
@@ -72,8 +91,11 @@ function App() {
             excellentCount={data.excellentCount}
             exceptionalCount={data.exceptionalCount}
           />
-        ) : (
+        )}
+        
+        {activeTab === 'outliers' && (
           <>
+            <FilteredStats videos={filteredVideos} />
             <FilterBar
               activeFilter={activeFilter}
               onFilterChange={setFilter}
@@ -86,6 +108,10 @@ function App() {
             />
             <VideoList videos={filteredVideos} maxItems={20} />
           </>
+        )}
+
+        {activeTab === 'settings' && (
+          <Settings theme={theme} onThemeChange={handleThemeChange} />
         )}
       </main>
 
