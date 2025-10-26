@@ -44,10 +44,10 @@ export const COLORS = {
 
 export const BADGE_CLASSES = {
   BASE: 'ytosc-badge',
-  GOLD: 'ytosc-badge--gold',
-  SILVER: 'ytosc-badge--silver',
-  BRONZE: 'ytosc-badge--bronze',
-  DEFAULT: 'ytosc-badge--default',
+  RED: 'ytosc-badge--red',
+  PURPLE: 'ytosc-badge--purple',
+  BLUE: 'ytosc-badge--blue',
+  GRAY: 'ytosc-badge--gray',
 } as const;
 
 export const FILTER_SELECTORS = {

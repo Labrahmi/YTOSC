@@ -36,10 +36,10 @@ export declare const COLORS: {
 };
 export declare const BADGE_CLASSES: {
     readonly BASE: "ytosc-badge";
-    readonly GOLD: "ytosc-badge--gold";
-    readonly SILVER: "ytosc-badge--silver";
-    readonly BRONZE: "ytosc-badge--bronze";
-    readonly DEFAULT: "ytosc-badge--default";
+    readonly RED: "ytosc-badge--red";
+    readonly PURPLE: "ytosc-badge--purple";
+    readonly BLUE: "ytosc-badge--blue";
+    readonly GRAY: "ytosc-badge--gray";
 };
 export declare const FILTER_SELECTORS: {
     readonly CONTAINER: "#ytosc-filter-container";

@@ -7,10 +7,10 @@ export interface BadgeProps {
 
 export function Badge({ score, className = '' }: BadgeProps) {
   const getVariant = (score: number): string => {
-    if (score >= 10) return 'gold';
-    if (score >= 5) return 'silver';
-    if (score >= 2) return 'bronze';
-    return 'default';
+    if (score >= 10) return 'red';
+    if (score >= 5) return 'purple';
+    if (score >= 2) return 'blue';
+    return 'gray';
   };
 
   const variant = getVariant(score);

@@ -43,14 +43,14 @@ export const EXTENSION_STYLES = `
   .ytosc-filter-chip-button {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: 500;
+    padding: 10px 16px;
+    font-size: 1.25rem;
+    font-weight: 600;
     border: none;
     background-color: #065fd4;
     color: #ffffff;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 8px;
     transition: all 0.2s ease;
     white-space: nowrap;
     font-family: 'Roboto', 'Arial', sans-serif;
@@ -112,23 +112,23 @@ export const EXTENSION_STYLES = `
     filter: brightness(1.1);
   }
   
-  .ytosc-badge--gold {
-    background: linear-gradient(135deg, #FF6B6B, #F44336);
+  .ytosc-badge--red {
+    background: linear-gradient(135deg, rgb(232, 21, 60) 0%, rgb(200, 15, 45) 100%);
     color: #FFFFFF;
   }
 
-  .ytosc-badge--silver {
-    background: linear-gradient(135deg, #FFD93D, #FF9800);
-    color: #000000;
+  .ytosc-badge--purple {
+    background: linear-gradient(135deg, rgb(221, 21, 232) 0%, rgb(180, 15, 195) 100%);
+    color: #FFFFFF;
   }
 
-  .ytosc-badge--bronze {
-    background: linear-gradient(135deg, #FFF176, #FFEB3B);
-    color: #000000;
+  .ytosc-badge--blue {
+    background: linear-gradient(135deg, rgb(35, 100, 240) 0%, rgb(25, 80, 200) 100%);
+    color: #FFFFFF;
   }
 
-  .ytosc-badge--default {
-    background: linear-gradient(135deg, #BDBDBD, #9E9E9E);
+  .ytosc-badge--gray {
+    background: linear-gradient(135deg, rgb(42, 55, 89) 0%, rgb(35, 45, 75) 100%);
     color: #FFFFFF;
   }
   
