@@ -22,37 +22,37 @@ export function injectBadgeStyles(): void {
   style.id = 'ytosc-badge-styles';
   style.textContent = `
     .ytosc-badge {
+      width: max-content;
       display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 6px;
-      margin-right: 6px;
-      border-radius: 3px;
+      padding: 3px 5px;
+      border-radius: 6px;
+      margin-right: 5px;
       color: white;
-      vertical-align: middle;
-      white-space: nowrap;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 11.7px;
       line-height: 1.2;
+      white-space: nowrap;
+      vertical-align: middle;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .ytosc-badge--red {
-      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-      box-shadow: 0 1px 3px rgba(231, 76, 60, 0.4);
+      background: rgb(232, 21, 60);
     }
 
     .ytosc-badge--purple {
-      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-      box-shadow: 0 1px 3px rgba(155, 89, 182, 0.4);
+      background: rgb(151, 55, 160);
     }
 
     .ytosc-badge--blue {
-      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      box-shadow: 0 1px 3px rgba(52, 152, 219, 0.4);
+      background: rgb(35, 100, 240);
     }
 
     .ytosc-badge--gray {
-      background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-      box-shadow: 0 1px 3px rgba(149, 165, 166, 0.3);
+      background: rgb(0, 0, 0);
+    }
+
+    .ytosc-badge--navy {
+      background: rgb(42, 55, 89);
     }
 
     /* Hidden class for filtering - hides the entire card */
@@ -84,12 +84,14 @@ export function injectBadgeStyles(): void {
 
 /**
  * Get badge color class based on score
+ * Matching reference: >10x = red, >5x = purple, >2x = blue, 1-2x = navy, <1x = black
  */
 function getBadgeClass(score: number): string {
-  if (score >= 10) return 'ytosc-badge--red';
-  if (score >= 5) return 'ytosc-badge--purple';
-  if (score >= 2) return 'ytosc-badge--blue';
-  return 'ytosc-badge--gray';
+  if (score > 10) return 'ytosc-badge--red';      // rgb(232, 21, 60)
+  if (score > 5) return 'ytosc-badge--purple';    // rgb(151, 55, 160)
+  if (score > 2) return 'ytosc-badge--blue';      // rgb(35, 100, 240)
+  if (score > 1) return 'ytosc-badge--navy';      // rgb(42, 55, 89)
+  return 'ytosc-badge--gray';                     // rgb(0, 0, 0)
 }
 
 /**

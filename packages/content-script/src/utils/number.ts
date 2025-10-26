@@ -35,14 +35,9 @@ export function formatNumber(num: number): string {
 
 /**
  * Format score for badge display
+ * Always shows one decimal digit (e.g., 0.3x, 2.8x, 12.7x)
  */
 export function formatScore(score: number): string {
-  if (score >= 10) {
-    return score.toFixed(0) + 'x';
-  }
-  if (score >= 2) {
-    return score.toFixed(1) + 'x';
-  }
-  return score.toFixed(2) + 'x';
+  return score.toFixed(1) + 'x';
 }
 

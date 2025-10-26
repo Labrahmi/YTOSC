@@ -11,5 +11,6 @@ export declare function median(numbers: number[]): number;
 export declare function formatNumber(num: number): string;
 /**
  * Format score for badge display
+ * Always shows one decimal digit (e.g., 0.3x, 2.8x, 12.7x)
  */
 export declare function formatScore(score: number): string;
