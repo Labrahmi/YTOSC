@@ -1,524 +1,244 @@
 /**
- * Content Script for YouTube Outlier Score Calculator
- * 
- * Main entry point that orchestrates:
- * - Video data extraction
- * - Outlier score calculation
- * - Badge injection
- * - Analytics modal display
+ * Content Script Bootstrap
+ * Main entry point that orchestrates all modules
  */
 
-import { calculateChannelOutlierScores } from '@core/index';
-import type { VideoWithScore } from '@core/types';
-
-import { TIMINGS, SELECTORS } from './constants';
-import { isOnChannelVideosPage, getVideoListContainer, getCardUrl, getVideoIdFromUrl } from './utils/dom';
-import { extractVideos } from './services/videoExtractor';
-import { injectBadges } from './services/badgeInjector';
-import { injectFilterContainer } from './services/filterInjector';
-import { setCurrentVideos } from './components/modal';
-import { injectStyles } from './styles/styles';
-import { setActiveFilterChip } from './components/filterChips';
-
-console.log('🎬 YouTube Outlier Score Calculator v1.0.0 loaded');
+import { store } from './state/store';
+import type { VideoRecord } from './state/types';
+import { DOMObserver } from './observers/DOMObserver';
+import { 
+  parseCardElements, 
+  extractViewsText, 
+  extractTitleText,
+  isChannelPage,
+  getChannelIdentifier 
+} from './parsers/youtubeSelectors';
+import { parseViews } from './parsers/parseViews';
+import { calculateAllScores } from './calc/score';
+import { injectBadgeStyles, ensureBadge } from './ui/injectBadge';
+import { injectFilterBar, setChipsEnabled } from './ui/filterBar';
+import { filterController } from './features/filterController';
+import { initMessageChannel } from './messaging/channel';
+import { logger } from './utils/logger';
 
 // Global state
-let currentVideos: VideoWithScore[] = [];
-let scrollObserver: MutationObserver | null = null;
-let lastProcessedCount = 0;
-let isProcessing = false;
-
-// Filter & sort state
-let activeFilter: 2 | 5 | 10 | null = null;
-let medianScore = 0;
-let lockedThreshold: number | null = null; // Locked threshold when user applies filter
-let originalOrder: Map<string, number> = new Map();
-let nodeById: Map<string, HTMLElement> = new Map();
-let isApplying = false;
-let emptyStateEl: HTMLElement | null = null;
-let filterEventListenerAttached = false;
-
-// Video loading limit
-const MAX_VIDEOS_WHEN_FILTERED = 60;
-let totalVideosLoaded = 0;
+let observer: DOMObserver | null = null;
+let currentChannel: string | null = null;
+let isInitialized = false;
 
 /**
- * Compute median outlier score from current videos
+ * Process new video cards discovered by the observer
  */
-function computeMedianScore(videos: VideoWithScore[]): number {
-  const validScores = videos
-    .map(v => v.outlierScore)
-    .filter((score): score is number => 
-      score !== null && 
-      score !== undefined && 
-      !isNaN(score) && 
-      score > 0
-    );
+function processNewCards(cards: HTMLElement[]): void {
+  if (cards.length === 0) return;
 
-  if (validScores.length === 0) return 0;
+  const state = store.getState();
+  const existingCount = state.list.length;
+  let newCount = 0;
 
-  const sorted = [...validScores].sort((a, b) => a - b);
-  const middle = Math.floor(sorted.length / 2);
-
-  if (sorted.length % 2 === 0) {
-    return (sorted[middle - 1] + sorted[middle]) / 2;
-  }
-  return sorted[middle];
-}
-
-/**
- * Capture original DOM order and map video cards by ID
- */
-function captureOriginalOrderAndMap(): void {
-  const container = getVideoListContainer();
-  if (!container) return;
-
-  const videoElements = container.querySelectorAll(`${SELECTORS.RICH_ITEM}, ${SELECTORS.GRID_VIDEO}`);
-  
-  videoElements.forEach((el, index) => {
-    const url = getCardUrl(el);
-    if (!url) return;
-
-    const videoId = getVideoIdFromUrl(url);
-    if (!videoId) return;
-
-    const htmlEl = el as HTMLElement;
-
-    // Only set original order for new items
-    if (!originalOrder.has(videoId)) {
-      originalOrder.set(videoId, index);
-    }
-
-    // Always update the node map
-    nodeById.set(videoId, htmlEl);
-
-    // Set data attributes for fast access
-    if (!htmlEl.dataset.ytoscId) {
-      htmlEl.dataset.ytoscId = videoId;
-    }
-
-    // Find the score from currentVideos
-    const video = currentVideos.find(v => getVideoIdFromUrl(v.url) === videoId);
-    if (video && video.outlierScore !== null && video.outlierScore !== undefined) {
-      htmlEl.dataset.ytoscScore = String(video.outlierScore);
-    }
-  });
-}
-
-/**
- * Apply filter to show only videos matching the threshold
- * @param multiplier - The filter multiplier (2, 5, or 10)
- * @param silent - If true, don't log the filter application (for auto-reapply)
- */
-function applyFilter(multiplier: 2 | 5 | 10, silent = false): void {
-  if (medianScore <= 0) {
-    console.warn('⚠️ Cannot apply filter: median score is 0');
-    return;
-  }
-
-  isApplying = true;
-
-  // Lock threshold on first application
-  let threshold: number;
-  if (!silent && lockedThreshold === null) {
-    threshold = multiplier * medianScore;
-    lockedThreshold = threshold;
-  } else if (lockedThreshold !== null) {
-    threshold = lockedThreshold;
-  } else {
-    threshold = multiplier * medianScore;
-  }
-
-  let visibleCount = 0;
-
-  // Simple show/hide - no reordering
-  nodeById.forEach((el) => {
-    const scoreStr = el.dataset.ytoscScore;
-    const score = scoreStr ? parseFloat(scoreStr) : null;
-
-    if (score !== null && !isNaN(score) && score > threshold) {
-      el.classList.remove('ytosc-hidden');
-      visibleCount++;
-    } else {
-      el.classList.add('ytosc-hidden');
-    }
-  });
-
-  // Show empty state if no matches
-  const container = getVideoListContainer();
-  if (visibleCount === 0 && container) {
-    showEmptyState(container);
-  } else {
-    hideEmptyState();
-  }
-
-  isApplying = false;
-
-  // Update UI (only on user action)
-  if (!silent) {
-    const chipId = `gt${multiplier}`;
-    setActiveFilterChip(chipId);
-    console.log(`🔍 Filter applied: >${multiplier}x (${threshold.toFixed(2)}) | ${visibleCount} visible`);
-  }
-}
-
-/**
- * Reset filter to show all videos
- */
-function resetFilter(): void {
-  isApplying = true;
-
-  // Simply show all videos
-  nodeById.forEach((el) => {
-    el.classList.remove('ytosc-hidden');
-  });
-
-  hideEmptyState();
-
-  // Clear filter state
-  activeFilter = null;
-  lockedThreshold = null;
-  setActiveFilterChip(null);
-
-  isApplying = false;
-
-  console.log('🔄 Filter reset: all videos visible');
-}
-
-/**
- * Show empty state message
- */
-function showEmptyState(container: Element): void {
-  hideEmptyState(); // Remove any existing empty state
-
-  emptyStateEl = document.createElement('div');
-  emptyStateEl.className = 'ytosc-empty';
-  emptyStateEl.textContent = 'No videos match this filter. Try a lower threshold or reset.';
-  emptyStateEl.dataset.ytoscEmpty = 'true';
-
-  // Insert at the beginning of the container
-  container.insertBefore(emptyStateEl, container.firstChild);
-}
-
-/**
- * Hide empty state message
- */
-function hideEmptyState(): void {
-  if (emptyStateEl && emptyStateEl.parentNode) {
-    emptyStateEl.parentNode.removeChild(emptyStateEl);
-    emptyStateEl = null;
-  }
-
-  // Also remove any orphaned empty states
-  const orphaned = document.querySelectorAll('[data-ytosc-empty]');
-  orphaned.forEach(el => el.parentNode?.removeChild(el));
-}
-
-/**
- * Check if we should stop loading more videos when filter is active
- */
-function shouldStopLoading(): boolean {
-  return activeFilter !== null && totalVideosLoaded >= MAX_VIDEOS_WHEN_FILTERED;
-}
-
-/**
- * Attach event listeners to filter chips
- */
-function attachFilterEventListeners(): void {
-  if (filterEventListenerAttached) return;
-
-  const container = document.querySelector('#ytosc-filter-container');
-  if (!container) return;
-
-  container.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    const chip = target.closest('.ytosc-filter-chip') as HTMLElement;
-
-    if (!chip) return;
-
-    const filterId = chip.dataset.filterId;
-    if (!filterId) return;
-
-    // Map filter IDs to multipliers
-    const multiplierMap: Record<string, 2 | 5 | 10 | null> = {
-      'gt2': 2,
-      'gt5': 5,
-      'gt10': 10,
-      'reset': null,
-    };
-
-    const multiplier = multiplierMap[filterId];
-
-    if (multiplier === null || filterId === 'reset') {
-      // Reset button clicked
-      resetFilter();
-    } else if (activeFilter === multiplier) {
-      // Clicking active filter toggles it off
-      resetFilter();
-    } else {
-      // Apply new filter
-      activeFilter = multiplier;
-      applyFilter(multiplier);
-    }
-  });
-
-  filterEventListenerAttached = true;
-  console.log('✅ Filter event listeners attached');
-}
-
-/**
- * Update filter chip states based on median score
- */
-function updateFilterChipStates(): void {
-  const container = document.querySelector('#ytosc-filter-container');
-  if (!container) return;
-
-  const chips = container.querySelectorAll('.ytosc-filter-chip:not(.ytosc-filter-chip--clear)');
-  
-  chips.forEach(chip => {
-    const htmlChip = chip as HTMLElement;
-    if (medianScore <= 0) {
-      htmlChip.classList.add('ytosc-filter-chip--disabled');
-      const button = htmlChip.querySelector('button');
-      if (button) {
-        button.setAttribute('aria-disabled', 'true');
-        button.setAttribute('disabled', 'true');
-      }
-    } else {
-      htmlChip.classList.remove('ytosc-filter-chip--disabled');
-      const button = htmlChip.querySelector('button');
-      if (button) {
-        button.removeAttribute('aria-disabled');
-        button.removeAttribute('disabled');
-      }
-    }
-  });
-}
-
-/**
- * Main function to inject outlier scores into the page
- */
-function injectOutlierScores(): void {
-  if (!isOnChannelVideosPage()) {
-    return;
-  }
-
-  // Inject styles first
-  injectStyles();
-
-  // Inject filter container
-  injectFilterContainer();
-
-  // Attach filter event listeners (once)
-  attachFilterEventListeners();
-
-  // Extract video data
-  const videos = extractVideos();
-
-  if (videos.length === 0) {
-    console.log('⚠️ No videos found on page');
-    return;
-  }
-
-  // Calculate outlier scores
-  currentVideos = calculateChannelOutlierScores(videos);
-
-  // Update total videos loaded count
-  totalVideosLoaded = currentVideos.length;
-
-  // Share with modal component
-  setCurrentVideos(currentVideos);
-
-  // Compute median score for filtering
-  medianScore = computeMedianScore(currentVideos);
-
-  // Capture original order and map nodes
-  captureOriginalOrderAndMap();
-
-  // Update filter chip states
-  updateFilterChipStates();
-
-  // Re-apply active filter silently to new videos
-  if (activeFilter !== null) {
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        applyFilter(activeFilter!, true);
-      }, TIMINGS.FILTER_REAPPLY_DELAY);
-    });
-  }
-
-  // Get score statistics
-  const videosWithScores = currentVideos.filter(v => v.outlierScore !== null);
-  const scores = videosWithScores.map(v => v.outlierScore!);
-  const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-  const maxScore = scores.length > 0 ? Math.max(...scores) : 0;
-  const highScores = videosWithScores.filter(v => v.outlierScore! >= 2).length;
-
-  // Inject badges into the DOM
-  const badgesInjected = injectBadges(currentVideos);
-
-  // Summary log with insights
-  console.log(
-    `✅ YTOSC: ${videos.length} videos analyzed | ` +
-    `${badgesInjected} badges | ` +
-    `Avg: ${avgScore.toFixed(1)}x | Max: ${maxScore.toFixed(1)}x | ` +
-    `≥2x: ${highScores} | Median: ${medianScore.toFixed(1)}x`
-  );
-}
-
-/**
- * Initialize scroll observer for infinite scroll detection
- */
-function initScrollObserver(): void {
-  let debounceTimer: number;
-  
-  scrollObserver = new MutationObserver(() => {
-    // Ignore mutations caused by our own filtering/sorting
-    if (isApplying) {
+  cards.forEach((card) => {
+    const elements = parseCardElements(card);
+    if (!elements || !elements.videoId || !elements.url) {
       return;
     }
 
-    clearTimeout(debounceTimer);
-    debounceTimer = window.setTimeout(() => {
-      // Prevent concurrent processing
-      if (isProcessing || isApplying) {
-        return;
-      }
+    // Check if already exists
+    const existing = store.getById(elements.videoId);
+    if (existing) {
+      // Already in store, skip
+      return;
+    }
 
-      // Stop loading if filter is active and reached limit
-      if (shouldStopLoading()) {
-        return;
-      }
-      
-      // Count current videos on page
-      let currentCount = document.querySelectorAll(SELECTORS.RICH_ITEM).length;
-      if (currentCount === 0) {
-        currentCount = document.querySelectorAll(SELECTORS.GRID_VIDEO).length;
-      }
-      
-      const injectedCount = document.querySelectorAll(SELECTORS.SCORED_VIDEO).length;
-      
-      // Smart detection: Only process if we have new videos
-      // AND not stuck in a loop (same count triggering repeatedly)
-      if (currentCount > injectedCount && currentCount !== lastProcessedCount) {
-        lastProcessedCount = currentCount;
-        isProcessing = true;
-        
-        injectOutlierScores();
-        
-        // Reset processing flag after a delay
-        setTimeout(() => {
-          isProcessing = false;
-        }, TIMINGS.PROCESSING_COOLDOWN);
-      }
-    }, TIMINGS.SCROLL_DEBOUNCE);
+    // Extract data
+    const title = extractTitleText(elements.titleEl);
+    const viewsText = extractViewsText(elements.viewsEl);
+    const views = parseViews(viewsText);
+
+    // Determine index in channel (current position in DOM)
+    const indexInChannel = existingCount + newCount;
+
+    // Create record
+    const record: VideoRecord = {
+      videoId: elements.videoId,
+      url: elements.url,
+      title,
+      views,
+      score: null,
+      indexInChannel,
+      status: views !== null ? 'parsed' : 'new',
+      dom: {
+        card,
+        titleEl: elements.titleEl!,
+      },
+    };
+
+    // Add to store
+    store.upsert(record);
+    newCount++;
   });
-  
-  // Observe the main content area for changes
-  const contentArea = document.querySelector(SELECTORS.CONTENT_AREA);
-  if (contentArea) {
-    scrollObserver.observe(contentArea, { childList: true, subtree: true });
+
+  if (newCount > 0) {
+    logger.log(`Added ${newCount} new videos to store`);
+
+    // Recalculate scores for all videos
+    calculateAllScores();
+
+    // Inject badges
+    const state = store.getState();
+    state.list.forEach(record => {
+      if (record.score !== null && record.status !== 'injected') {
+        ensureBadge(record);
+        store.update(record.videoId, { status: 'injected' });
+      }
+    });
+
+    // Update filter chip states
+    const medianScore = store.getMedianScore();
+    setChipsEnabled(medianScore > 0);
+
+    // Reapply filter if active
+    if (filterController.isActive()) {
+      filterController.reapply();
+    }
+
+    // Log summary
+    const videosWithScores = state.list.filter(r => r.score !== null).length;
+    logger.success(
+      `Processed: ${state.list.length} total videos | ` +
+      `${videosWithScores} scored | ` +
+      `Median: ${medianScore.toFixed(2)}x`
+    );
   }
 }
 
 /**
- * Initialize URL change observer for SPA navigation
+ * Initialize the extension on the current page
  */
-function initUrlObserver(): void {
-  let lastUrl = location.href;
-  
-  new MutationObserver(() => {
-    const url = location.href;
-    if (url !== lastUrl) {
-      lastUrl = url;
-      setTimeout(injectOutlierScores, TIMINGS.URL_CHANGE_DELAY);
+function initialize(): void {
+  if (isInitialized) {
+    logger.warn('Already initialized, skipping');
+    return;
+  }
+
+  if (!isChannelPage()) {
+    logger.log('Not on a channel page, skipping initialization');
+    return;
+  }
+
+  logger.log('Initializing YouTube Outlier Score Calculator...');
+
+  // Inject styles
+  injectBadgeStyles();
+
+  // Initialize message channel
+  initMessageChannel();
+
+  // Inject filter bar
+  injectFilterBar((threshold) => {
+    if (threshold === null) {
+      filterController.reset();
+    } else {
+      filterController.toggle(threshold);
     }
-  }).observe(document.body, { subtree: true, childList: true });
+  });
+
+  // Create and start DOM observer
+  observer = new DOMObserver(processNewCards);
+  observer.start();
+
+  // Track current channel
+  currentChannel = getChannelIdentifier();
+
+  isInitialized = true;
+  logger.success('Initialization complete');
 }
 
 /**
- * Message listener for popup communication
+ * Clean up and reinitialize for a new channel
  */
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === 'GET_CHANNEL_DATA') {
-    // Check if we're on a channel page
-    if (!isOnChannelVideosPage()) {
-      sendResponse({
-        error: 'Not on a YouTube channel page',
-        videos: null,
-        medianViews: null,
-      });
-      return true;
-    }
+function reinitialize(): void {
+  logger.log('Reinitializing for new channel...');
 
-    // Return current video data with scores
-    if (currentVideos.length > 0) {
-      const validVideos = currentVideos.filter(v => v.viewCount !== null && v.viewCount !== undefined);
-      const viewCounts = validVideos.map(v => v.viewCount!);
-      const medianViews = viewCounts.length > 0 ? calculateMedian(viewCounts) : 0;
+  // Stop observer
+  if (observer) {
+    observer.stop();
+    observer.clear();
+  }
 
-      sendResponse({
-        videos: currentVideos,
-        medianViews,
-        error: null,
-      });
-    } else {
-      // No videos extracted yet, try to extract now
-      const videos = extractVideos();
-      if (videos.length > 0) {
-        const videosWithScores = calculateChannelOutlierScores(videos);
-        currentVideos = videosWithScores;
+  // Clear store
+  store.clear();
 
-        const validVideos = videosWithScores.filter(v => v.viewCount !== null && v.viewCount !== undefined);
-        const viewCounts = validVideos.map(v => v.viewCount!);
-        const medianViews = viewCounts.length > 0 ? calculateMedian(viewCounts) : 0;
+  // Reset filter
+  filterController.reset();
 
-        sendResponse({
-          videos: videosWithScores,
-          medianViews,
-          error: null,
-        });
+  // Reset state
+  isInitialized = false;
+
+  // Initialize fresh
+  setTimeout(initialize, 500);
+}
+
+/**
+ * Handle YouTube SPA navigation
+ */
+function watchNavigation(): void {
+  let lastUrl = location.href;
+
+  const checkNavigation = () => {
+    const currentUrl = location.href;
+    if (currentUrl !== lastUrl) {
+      lastUrl = currentUrl;
+
+      const newChannel = getChannelIdentifier();
+      
+      if (isChannelPage()) {
+        if (newChannel !== currentChannel) {
+          // Navigated to a different channel
+          reinitialize();
+        } else if (!isInitialized) {
+          // Navigated back to a channel page
+          initialize();
+        }
       } else {
-        sendResponse({
-          error: 'No videos found. Please wait for the page to load.',
-          videos: null,
-          medianViews: null,
-        });
+        // Navigated away from channel page
+        if (observer) {
+          observer.stop();
+        }
+        isInitialized = false;
       }
     }
+  };
 
-    return true; // Keep the message channel open for async response
-  }
-});
+  // Watch for URL changes
+  const navigationObserver = new MutationObserver(checkNavigation);
+  navigationObserver.observe(document.body, { 
+    childList: true, 
+    subtree: true 
+  });
 
-/**
- * Helper function to calculate median
- */
-function calculateMedian(numbers: number[]): number {
-  if (numbers.length === 0) return 0;
-  const sorted = [...numbers].sort((a, b) => a - b);
-  const middle = Math.floor(sorted.length / 2);
-  if (sorted.length % 2 === 0) {
-    return (sorted[middle - 1] + sorted[middle]) / 2;
-  }
-  return sorted[middle];
+  // Also listen to popstate events
+  window.addEventListener('popstate', checkNavigation);
 }
 
 /**
- * Initialize the content script
+ * Bootstrap the extension
  */
-function init(): void {
-  // Initial injection
-  setTimeout(() => {
-    injectOutlierScores();
-  }, TIMINGS.INITIAL_INJECTION_DELAY);
-  
-  // Watch for URL changes (YouTube SPA navigation)
-  initUrlObserver();
-  
-  // Watch for infinite scroll
-  initScrollObserver();
+function bootstrap(): void {
+  logger.log('YouTube Outlier Score Calculator v2.0.0 loaded');
+
+  // Wait for page to be ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initialize, 1000);
+    });
+  } else {
+    setTimeout(initialize, 1000);
+  }
+
+  // Watch for navigation
+  watchNavigation();
 }
 
 // Start the extension
-init();
+bootstrap();
+

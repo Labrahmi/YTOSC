@@ -1,10 +1,5 @@
 /**
- * Content Script for YouTube Outlier Score Calculator
- *
- * Main entry point that orchestrates:
- * - Video data extraction
- * - Outlier score calculation
- * - Badge injection
- * - Analytics modal display
+ * Content Script Bootstrap
+ * Main entry point that orchestrates all modules
  */
 export {};
