@@ -3,9 +3,9 @@
  */
 
 import { VideoWithScore } from '@core/types';
-import { getMedianViewCount } from '@core/index';
 import { SELECTORS } from '../constants';
 import { getThumbnailUrl, escapeHtml, formatNumber } from '../utils/dom';
+import { getMedianViewCount } from '../utils/number';
 import { calculatePercentile, getPerformanceLevel, getAnalysisText } from '../utils/analytics';
 import { getBadgeClass } from './badge';
 

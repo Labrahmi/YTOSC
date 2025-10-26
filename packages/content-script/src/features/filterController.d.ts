@@ -6,11 +6,42 @@ declare class FilterController {
     private currentThreshold;
     private scrollTriggerTimeout;
     private currentSort;
+    private loadingStartTime;
+    private lastVideoCount;
+    private noProgressCount;
+    private loadingCheckInterval;
+    private readonly MAX_LOADING_TIME;
+    private readonly NO_PROGRESS_THRESHOLD;
+    private readonly PROGRESS_CHECK_INTERVAL;
     /**
      * Apply filter with given threshold
      * Hides videos below threshold and triggers loading
      */
     applyFilter(threshold: 2 | 5 | 10): void;
+    /**
+     * Complete filter immediately for small channels
+     */
+    private completeFilterImmediately;
+    /**
+     * Start tracking loading progress
+     */
+    private startProgressTracking;
+    /**
+     * Stop progress tracking
+     */
+    private stopProgressTracking;
+    /**
+     * Check if loading is making progress
+     */
+    private checkLoadingProgress;
+    /**
+     * Detect if we've reached the end of the channel
+     */
+    private isAtChannelEnd;
+    /**
+     * Stop loading and show appropriate message
+     */
+    private stopLoadingWithMessage;
     /**
      * Apply visibility to DOM based on current filter
      */

@@ -36,7 +36,12 @@ export function showLoadingOverlay(message: string = 'Loading videos...'): void 
 /**
  * Update loading overlay message
  */
-export function updateLoadingMessage(count: number, target: number): void {
+export function updateLoadingMessage(
+  count: number,
+  target: number,
+  message?: string,
+  subtext?: string
+): void {
   const overlay = document.getElementById(OVERLAY_ID);
   if (!overlay) return;
 
@@ -44,10 +49,10 @@ export function updateLoadingMessage(count: number, target: number): void {
   const subtextEl = overlay.querySelector('.ytosc-loading-subtext');
   
   if (textEl) {
-    textEl.textContent = `Loading videos...`;
+    textEl.textContent = message || `Loading videos...`;
   }
   if (subtextEl) {
-    subtextEl.textContent = `Found ${count} of ${target} matching videos`;
+    subtextEl.textContent = subtext || `Found ${count} of ${target} matching videos`;
   }
 }
 

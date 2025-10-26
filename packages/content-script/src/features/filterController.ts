@@ -12,6 +12,17 @@ class FilterController {
   private currentThreshold: 2 | 5 | 10 | null = null;
   private scrollTriggerTimeout: number | null = null;
   private currentSort: 'ascending' | 'descending' | null = null;
+  
+  // Loading timeout and progress tracking
+  private loadingStartTime: number = 0;
+  private lastVideoCount: number = 0;
+  private noProgressCount: number = 0;
+  private loadingCheckInterval: number | null = null;
+  
+  // Constants for loading behavior
+  private readonly MAX_LOADING_TIME = 45000; // 45 seconds max (reduced from 60)
+  private readonly NO_PROGRESS_THRESHOLD = 3; // Give up after 3 checks with no progress
+  private readonly PROGRESS_CHECK_INTERVAL = 3000; // Check every 3 seconds (faster than 5s)
 
   /**
    * Apply filter with given threshold
@@ -53,14 +64,215 @@ class FilterController {
       `${visibleCount} visible`
     );
 
+    // Quick check for small channels - don't waste time loading
+    const totalVideos = state.list.length;
+    const isSmallChannel = totalVideos < 30;
+    const alreadyAtEnd = this.isAtChannelEnd();
+    
+    if (isSmallChannel || alreadyAtEnd) {
+      logger.log(`Small channel detected (${totalVideos} videos) or at end - showing results immediately`);
+      
+      // Complete immediately without loading animation
+      this.completeFilterImmediately(visibleCount, state.filter.targetVisibleCount);
+      return;
+    }
+
     // Show loading overlay if we need to load more
     if (visibleCount < state.filter.targetVisibleCount) {
       showLoadingOverlay();
       updateLoadingMessage(visibleCount, state.filter.targetVisibleCount);
+      
+      // Start progress tracking
+      this.startProgressTracking();
     }
 
     // Trigger scroll to load more if needed
     this.triggerLoadingIfNeeded();
+  }
+  
+  /**
+   * Complete filter immediately for small channels
+   */
+  private completeFilterImmediately(visibleCount: number, targetCount: number): void {
+    store.setLoadingPaused(true);
+    
+    // No overlay for small channels - instant results
+    if (visibleCount === 0) {
+      logger.log('No matching videos in this channel');
+    } else if (visibleCount < targetCount) {
+      logger.log(`Found ${visibleCount} matching videos (channel has limited videos)`);
+    } else {
+      logger.log(`Filter complete with ${visibleCount} videos`);
+    }
+    
+    // Just scroll to top smoothly, no loading overlay
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  /**
+   * Start tracking loading progress
+   */
+  private startProgressTracking(): void {
+    // Clear any existing tracking
+    this.stopProgressTracking();
+    
+    // Initialize tracking variables
+    this.loadingStartTime = Date.now();
+    this.lastVideoCount = store.getState().list.length;
+    this.noProgressCount = 0;
+    
+    // Start interval to check progress
+    this.loadingCheckInterval = window.setInterval(() => {
+      this.checkLoadingProgress();
+    }, this.PROGRESS_CHECK_INTERVAL);
+    
+    logger.log('Started progress tracking for filter loading');
+  }
+  
+  /**
+   * Stop progress tracking
+   */
+  private stopProgressTracking(): void {
+    if (this.loadingCheckInterval !== null) {
+      clearInterval(this.loadingCheckInterval);
+      this.loadingCheckInterval = null;
+    }
+    this.noProgressCount = 0;
+  }
+  
+  /**
+   * Check if loading is making progress
+   */
+  private checkLoadingProgress(): void {
+    const state = store.getState();
+    const currentVideoCount = state.list.length;
+    const visibleCount = this.countDomVisibleVideos();
+    const elapsedTime = Date.now() - this.loadingStartTime;
+    
+    // Check if we've exceeded max loading time
+    if (elapsedTime > this.MAX_LOADING_TIME) {
+      logger.warn(`Filter loading timeout after ${elapsedTime}ms`);
+      this.stopLoadingWithMessage(
+        visibleCount,
+        state.filter.targetVisibleCount,
+        'timeout'
+      );
+      return;
+    }
+    
+    // Check if videos are being added
+    if (currentVideoCount === this.lastVideoCount) {
+      this.noProgressCount++;
+      logger.log(`No progress detected (${this.noProgressCount}/${this.NO_PROGRESS_THRESHOLD})`);
+      
+      // Check if we've reached YouTube's end
+      if (this.isAtChannelEnd()) {
+        logger.log('Detected end of channel content');
+        this.stopLoadingWithMessage(
+          visibleCount,
+          state.filter.targetVisibleCount,
+          'end_of_channel'
+        );
+        return;
+      }
+      
+      // Give up after no progress for too long
+      if (this.noProgressCount >= this.NO_PROGRESS_THRESHOLD) {
+        logger.warn('No progress after multiple checks, giving up');
+        this.stopLoadingWithMessage(
+          visibleCount,
+          state.filter.targetVisibleCount,
+          'no_progress'
+        );
+        return;
+      }
+    } else {
+      // Progress detected, reset counter
+      this.noProgressCount = 0;
+      this.lastVideoCount = currentVideoCount;
+      logger.log(`Progress detected: ${currentVideoCount} total videos, ${visibleCount} visible`);
+    }
+  }
+  
+  /**
+   * Detect if we've reached the end of the channel
+   */
+  private isAtChannelEnd(): boolean {
+    // Check for YouTube's "no more results" indicators
+    const endIndicators = [
+      // YouTube's continuation renderer
+      'ytd-continuation-item-renderer[hidden]',
+      // Grid continuation
+      '#continuations[hidden]',
+      // Message renderer
+      'ytd-message-renderer',
+    ];
+    
+    for (const selector of endIndicators) {
+      const el = document.querySelector(selector);
+      if (el) {
+        logger.log(`Found end indicator: ${selector}`);
+        return true;
+      }
+    }
+    
+    // Check if scroll height hasn't changed (nothing more to load)
+    const scrollableEl = document.documentElement || document.body;
+    const isAtBottom = scrollableEl.scrollTop + scrollableEl.clientHeight >= scrollableEl.scrollHeight - 50;
+    
+    return isAtBottom;
+  }
+  
+  /**
+   * Stop loading and show appropriate message
+   */
+  private stopLoadingWithMessage(
+    foundCount: number,
+    targetCount: number,
+    reason: 'timeout' | 'no_progress' | 'end_of_channel'
+  ): void {
+    this.stopProgressTracking();
+    store.setLoadingPaused(true);
+    
+    // Determine message based on reason
+    let message: string;
+    let subtext: string;
+    
+    if (foundCount === 0) {
+      message = 'No matching videos found';
+      subtext = 'Try a lower threshold filter';
+    } else if (foundCount < targetCount) {
+      message = `Found ${foundCount} matching video${foundCount === 1 ? '' : 's'}`;
+      
+      if (reason === 'end_of_channel') {
+        subtext = 'Reached end of channel';
+      } else if (reason === 'timeout') {
+        subtext = 'Loading took too long';
+      } else {
+        subtext = 'No more videos available';
+      }
+    } else {
+      message = 'Loading complete';
+      subtext = `Found ${foundCount} videos`;
+    }
+    
+    logger.log(`Stopping filter loading: ${reason} - ${message}`);
+    
+    // Update overlay with final message
+    updateLoadingMessage(foundCount, targetCount, message, subtext);
+    
+    // Hide overlay after showing message
+    setTimeout(() => {
+      hideLoadingOverlay(1000);
+      
+      // Scroll back to top
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth',
+        });
+      }, 500);
+    }, 2000);
   }
 
   /**
@@ -113,20 +325,31 @@ class FilterController {
     
     if (visibleCount >= state.filter.targetVisibleCount) {
       // We have enough videos, pause loading and scroll back to top
+      this.stopProgressTracking();
       store.setLoadingPaused(true);
       logger.log(`Target reached: ${visibleCount} visible videos`);
       
-      // Hide loading overlay
-      hideLoadingOverlay();
+      // Update overlay with success message
+      updateLoadingMessage(
+        visibleCount,
+        state.filter.targetVisibleCount,
+        'Loading complete',
+        `Found ${visibleCount} matching videos`
+      );
       
-      // Scroll back to top once at the end
+      // Hide loading overlay
       setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth',
-        });
-        logger.log('Filter complete - scrolled back to top');
-      }, 500);
+        hideLoadingOverlay(1000);
+        
+        // Scroll back to top
+        setTimeout(() => {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+          });
+          logger.log('Filter complete - scrolled back to top');
+        }, 500);
+      }, 1500);
       
       return;
     }
@@ -240,10 +463,12 @@ class FilterController {
     this.currentThreshold = null;
     this.currentSort = null;
 
+    // Clean up all timeouts and intervals
     if (this.scrollTriggerTimeout) {
       clearTimeout(this.scrollTriggerTimeout);
       this.scrollTriggerTimeout = null;
     }
+    this.stopProgressTracking();
 
     // Update store state
     const state = store.getState();

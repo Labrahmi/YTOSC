@@ -9,7 +9,7 @@ export declare function showLoadingOverlay(message?: string): void;
 /**
  * Update loading overlay message
  */
-export declare function updateLoadingMessage(count: number, target: number): void;
+export declare function updateLoadingMessage(count: number, target: number, message?: string, subtext?: string): void;
 /**
  * Hide loading overlay with delay
  */

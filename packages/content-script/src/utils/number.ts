@@ -41,3 +41,15 @@ export function formatScore(score: number): string {
   return score.toFixed(1) + 'x';
 }
 
+/**
+ * Get median view count from a list of videos with viewCount property
+ * Filters out null/undefined/zero values before calculating
+ */
+export function getMedianViewCount<T extends { viewCount: number | null | undefined }>(videos: T[]): number {
+  const viewCounts = videos
+    .map((v) => v.viewCount)
+    .filter((v): v is number => v !== null && v !== undefined && v > 0);
+  
+  return median(viewCounts);
+}
+

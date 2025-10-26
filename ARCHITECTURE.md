@@ -134,11 +134,13 @@ export const SELECTORS = {
 
 ## 📦 Module Responsibilities
 
-### Core Package (`@core`)
-**Pure business logic, no DOM dependencies**
-- ✅ Outlier score calculation
-- ✅ View count parsing
-- ✅ Type definitions
+### Core Package (`@ytosc/core`)
+**Shared types and utilities, no DOM dependencies**
+- ✅ Type definitions (VideoData, VideoWithScore, etc.)
+- ✅ View count parsing (international formats)
+- ⚠️ Outlier score calculation (deprecated reference implementation)
+  - Active implementation: `content-script/src/calc/score.ts`
+  - Kept for testing and documentation only
 - ❌ No DOM access
 - ❌ No side effects
 
