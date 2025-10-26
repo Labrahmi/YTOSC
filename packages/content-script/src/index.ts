@@ -134,11 +134,13 @@ function initialize(): void {
   initMessageChannel();
 
   // Inject filter bar
-  injectFilterBar((threshold) => {
-    if (threshold === null) {
+  injectFilterBar((action) => {
+    if (action === null) {
       filterController.reset();
+    } else if (action === 'ascending' || action === 'descending') {
+      filterController.applySort(action);
     } else {
-      filterController.toggle(threshold);
+      filterController.toggle(action);
     }
   });
 

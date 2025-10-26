@@ -11,6 +11,7 @@ import { logger } from '../utils/logger';
 class FilterController {
   private currentThreshold: 2 | 5 | 10 | null = null;
   private scrollTriggerTimeout: number | null = null;
+  private currentSort: 'ascending' | 'descending' | null = null;
 
   /**
    * Apply filter with given threshold
@@ -161,10 +162,83 @@ class FilterController {
   }
 
   /**
+   * Apply sorting to videos
+   */
+  applySort(direction: 'ascending' | 'descending'): void {
+    // Clear any active filters first
+    this.currentThreshold = null;
+    this.currentSort = direction;
+
+    if (this.scrollTriggerTimeout) {
+      clearTimeout(this.scrollTriggerTimeout);
+      this.scrollTriggerTimeout = null;
+    }
+
+    // Update store state
+    const state = store.getState();
+    store.setFilter({
+      active: false,
+      targetVisibleCount: state.filter.targetVisibleCount,
+      currentVisibleCount: 0,
+      isLoadingPaused: false,
+    });
+    store.setUIState({ mode: 'sorted', sortDirection: direction });
+
+    // Show all videos first (clear any hidden)
+    state.list.forEach(record => {
+      record.dom.card.classList.remove('ytosc-hidden');
+    });
+
+    // Sort videos by score
+    this.sortVideosInDom(direction);
+
+    // Update UI
+    setActiveChip(direction);
+
+    logger.log(`Sort applied: ${direction}`);
+  }
+
+  /**
+   * Sort videos in the DOM by rearranging elements
+   */
+  private sortVideosInDom(direction: 'ascending' | 'descending'): void {
+    const state = store.getState();
+    const container = state.list[0]?.dom.card.parentElement;
+    
+    if (!container) {
+      logger.warn('Could not find video container for sorting');
+      return;
+    }
+
+    // Create sorted list of records
+    const sortedRecords = [...state.list]
+      .filter(r => r.score !== null)
+      .sort((a, b) => {
+        const scoreA = a.score ?? -Infinity;
+        const scoreB = b.score ?? -Infinity;
+        return direction === 'ascending' ? scoreA - scoreB : scoreB - scoreA;
+      });
+
+    // Records without scores go at the end
+    const noScoreRecords = state.list.filter(r => r.score === null);
+    const allSorted = [...sortedRecords, ...noScoreRecords];
+
+    // Rearrange DOM elements
+    const fragment = document.createDocumentFragment();
+    allSorted.forEach(record => {
+      fragment.appendChild(record.dom.card);
+    });
+    container.appendChild(fragment);
+
+    logger.log(`Sorted ${sortedRecords.length} videos ${direction}`);
+  }
+
+  /**
    * Reset filter to show all videos
    */
   reset(): void {
     this.currentThreshold = null;
+    this.currentSort = null;
 
     if (this.scrollTriggerTimeout) {
       clearTimeout(this.scrollTriggerTimeout);
@@ -183,6 +257,17 @@ class FilterController {
 
     // Show all videos
     this.applyVisibilityToDom();
+
+    // Restore original order (by indexInChannel)
+    const container = state.list[0]?.dom.card.parentElement;
+    if (container) {
+      const fragment = document.createDocumentFragment();
+      const sortedByIndex = [...state.list].sort((a, b) => a.indexInChannel - b.indexInChannel);
+      sortedByIndex.forEach(record => {
+        fragment.appendChild(record.dom.card);
+      });
+      container.appendChild(fragment);
+    }
 
     // Hide loading overlay if showing
     hideLoadingOverlay();
@@ -216,6 +301,13 @@ class FilterController {
    */
   isActive(): boolean {
     return this.currentThreshold !== null;
+  }
+
+  /**
+   * Get current sort direction
+   */
+  getCurrentSort(): 'ascending' | 'descending' | null {
+    return this.currentSort;
   }
 
   /**

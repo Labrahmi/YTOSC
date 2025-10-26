@@ -1,7 +1,7 @@
 /**
  * In-page filter bar (chips for 2x, 5x, 10x, Reset)
  */
-export type FilterCallback = (threshold: 2 | 5 | 10 | null) => void;
+export type FilterCallback = (threshold: 2 | 5 | 10 | 'ascending' | 'descending' | null) => void;
 /**
  * Inject filter bar into the page
  */

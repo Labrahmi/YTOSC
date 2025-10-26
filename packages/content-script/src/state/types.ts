@@ -35,7 +35,8 @@ export interface FilterState {
 }
 
 export interface UIState {
-  mode: 'normal' | 'filtered';     // Removed 'sorted' mode
+  mode: 'normal' | 'filtered' | 'sorted';
+  sortDirection?: 'ascending' | 'descending';  // Sort direction for sorted mode
 }
 
 export interface StoreState {

@@ -5,6 +5,7 @@
 declare class FilterController {
     private currentThreshold;
     private scrollTriggerTimeout;
+    private currentSort;
     /**
      * Apply filter with given threshold
      * Hides videos below threshold and triggers loading
@@ -27,6 +28,14 @@ declare class FilterController {
      */
     private scrollToTriggerLoad;
     /**
+     * Apply sorting to videos
+     */
+    applySort(direction: 'ascending' | 'descending'): void;
+    /**
+     * Sort videos in the DOM by rearranging elements
+     */
+    private sortVideosInDom;
+    /**
      * Reset filter to show all videos
      */
     reset(): void;
@@ -42,6 +51,10 @@ declare class FilterController {
      * Check if filter is active
      */
     isActive(): boolean;
+    /**
+     * Get current sort direction
+     */
+    getCurrentSort(): 'ascending' | 'descending' | null;
     /**
      * Reapply current filter (after new videos loaded)
      * Called when new videos are added to the page

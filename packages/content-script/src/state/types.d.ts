@@ -31,7 +31,8 @@ export interface FilterState {
     isLoadingPaused: boolean;
 }
 export interface UIState {
-    mode: 'normal' | 'filtered';
+    mode: 'normal' | 'filtered' | 'sorted';
+    sortDirection?: 'ascending' | 'descending';
 }
 export interface StoreState {
     list: VideoRecord[];

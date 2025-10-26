@@ -6,7 +6,7 @@ import { logger } from '../utils/logger';
 
 const FILTER_BAR_ID = 'ytosc-filter-container';
 
-export type FilterCallback = (threshold: 2 | 5 | 10 | null) => void;
+export type FilterCallback = (threshold: 2 | 5 | 10 | 'ascending' | 'descending' | null) => void;
 
 /**
  * Inject filter bar into the page
@@ -34,6 +34,12 @@ export function injectFilterBar(onFilterChange: FilterCallback): void {
   
   // Create filter buttons (matching reference style)
   container.innerHTML = `
+    <button class="ytosc-filter-btn" data-filter-id="ascending" type="button" aria-label="Sort videos by score ascending">
+      Ascending
+    </button>
+    <button class="ytosc-filter-btn" data-filter-id="descending" type="button" aria-label="Sort videos by score descending">
+      Descending
+    </button>
     <button class="ytosc-filter-btn" data-filter-id="gt2" type="button" aria-label="Show videos with outlier score greater than 2x">
       >2
     </button>
@@ -58,16 +64,18 @@ export function injectFilterBar(onFilterChange: FilterCallback): void {
     const filterId = button.dataset.filterId;
     if (!filterId) return;
 
-    // Map filter IDs to thresholds
-    const thresholdMap: Record<string, 2 | 5 | 10 | null> = {
+    // Map filter IDs to thresholds/actions
+    const actionMap: Record<string, 2 | 5 | 10 | 'ascending' | 'descending' | null> = {
+      'ascending': 'ascending',
+      'descending': 'descending',
       'gt2': 2,
       'gt5': 5,
       'gt10': 10,
       'reset': null,
     };
 
-    const threshold = thresholdMap[filterId];
-    onFilterChange(threshold);
+    const action = actionMap[filterId];
+    onFilterChange(action);
   });
 
   // Insert into page
