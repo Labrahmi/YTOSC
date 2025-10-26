@@ -53,3 +53,11 @@ export declare function escapeHtml(text: string): string;
  * Format number with commas
  */
 export declare function formatNumber(num: number): string;
+/**
+ * Get the video list container (the parent that holds the video cards)
+ */
+export declare function getVideoListContainer(): Element | null;
+/**
+ * Get the canonical video URL from a card element
+ */
+export declare function getCardUrl(element: Element): string | null;

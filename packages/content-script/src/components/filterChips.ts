@@ -14,12 +14,10 @@ export interface FilterChip {
  * Filter chip configurations
  */
 const FILTER_CHIPS: FilterChip[] = [
-  { label: 'Ascending', id: 'ascending' },
-  { label: 'Descending', id: 'descending' },
-  { label: '>2', id: 'gt2' },
-  { label: '>5', id: 'gt5' },
-  { label: '>10', id: 'gt10' },
-  { label: 'Clear', id: 'clear', isClear: true },
+  { label: '> 2x median', id: 'gt2' },
+  { label: '> 5x median', id: 'gt5' },
+  { label: '> 10x median', id: 'gt10' },
+  { label: 'Reset', id: 'reset', isClear: true },
 ];
 
 /**

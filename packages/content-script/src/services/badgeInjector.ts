@@ -4,7 +4,7 @@
 
 import type { VideoWithScore } from '@core/types';
 import { SELECTORS } from '../constants';
-import { getVideoElements, findTitleContainer } from '../utils/dom';
+import { getVideoElements, findTitleContainer, getCardUrl } from '../utils/dom';
 import { createBadge } from '../components/badge';
 
 /**
@@ -14,8 +14,21 @@ export function injectBadges(videos: VideoWithScore[]): number {
   const videoElements = getVideoElements();
   let badgesInjected = 0;
 
-  videoElements.forEach((element, index) => {
-    const video = videos[index];
+  // Create a map of URL -> video for fast lookup
+  const videoMap = new Map<string, VideoWithScore>();
+  videos.forEach(video => {
+    if (video.url) {
+      videoMap.set(video.url, video);
+    }
+  });
+
+  videoElements.forEach((element) => {
+    // Get the URL from the element
+    const url = getCardUrl(element);
+    if (!url) return;
+
+    // Find the matching video by URL
+    const video = videoMap.get(url);
     if (!video || video.outlierScore === null) {
       return;
     }
@@ -26,10 +39,11 @@ export function injectBadges(videos: VideoWithScore[]): number {
       return;
     }
 
-    // Remove existing badge if present
+    // Check if badge already exists
     const existingBadge = titleContainer.querySelector(SELECTORS.BADGE);
     if (existingBadge) {
-      existingBadge.remove();
+      // Badge already present, skip
+      return;
     }
 
     // Create and inject new badge at the start of the title

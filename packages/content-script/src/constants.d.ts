@@ -19,9 +19,9 @@ export declare const SELECTORS: {
 export declare const TIMINGS: {
     readonly INITIAL_INJECTION_DELAY: 1500;
     readonly URL_CHANGE_DELAY: 1500;
-    readonly SCROLL_DEBOUNCE: 500;
-    readonly PROCESSING_COOLDOWN: 1000;
-    readonly FILTER_REAPPLY_DELAY: 100;
+    readonly SCROLL_DEBOUNCE: 300;
+    readonly PROCESSING_COOLDOWN: 500;
+    readonly FILTER_REAPPLY_DELAY: 50;
 };
 export declare const SCORE_THRESHOLDS: {
     readonly EXCEPTIONAL: 10;

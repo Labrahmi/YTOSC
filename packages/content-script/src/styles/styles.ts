@@ -345,6 +345,33 @@ export const EXTENSION_STYLES = `
     border-radius: 4px;
     transition: width 0.5s ease;
   }
+
+  /* Filter & Sort: Hidden video items */
+  .ytosc-hidden {
+    display: none !important;
+  }
+
+  /* Filter & Sort: Empty state message */
+  .ytosc-empty {
+    padding: 24px;
+    text-align: center;
+    color: var(--yt-spec-text-secondary, #606060);
+    font-size: 14px;
+    background: var(--yt-spec-10-percent-layer, #f9f9f9);
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+
+  /* Filter & Sort: Disabled filter chip */
+  .ytosc-filter-chip--disabled .ytosc-filter-chip-button {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .ytosc-filter-chip--disabled:hover .ytosc-filter-chip-button {
+    background-color: #9e9e9e;
+  }
 `;
 
 /**

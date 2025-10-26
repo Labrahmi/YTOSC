@@ -174,3 +174,34 @@ export function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
+/**
+ * Get the video list container (the parent that holds the video cards)
+ */
+export function getVideoListContainer(): Element | null {
+  // Try rich grid first (most common on channel pages)
+  let container = document.querySelector('ytd-rich-grid-renderer #contents');
+  if (container) return container;
+
+  // Fallback to other grid layouts
+  const selectors = [
+    'ytd-grid-renderer #contents',
+    'ytd-two-column-browse-results-renderer #contents',
+    '#contents.ytd-rich-grid-renderer'
+  ];
+
+  for (const selector of selectors) {
+    container = document.querySelector(selector);
+    if (container) return container;
+  }
+
+  return null;
+}
+
+/**
+ * Get the canonical video URL from a card element
+ */
+export function getCardUrl(element: Element): string | null {
+  const titleElement = findTitleElement(element);
+  return titleElement?.href || null;
+}
+
