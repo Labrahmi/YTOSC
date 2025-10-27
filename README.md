@@ -35,7 +35,7 @@ This project uses a modular monorepo architecture with clear separation of conce
 
 1. **Clone and install**:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Labrahmi/YTOSC
    cd YTOSC
    npm install
    ```
