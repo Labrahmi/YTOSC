@@ -8,7 +8,9 @@ import { formatScore } from '../utils/number';
 import { getTitleContainer } from '../parsers/youtubeSelectors';
 
 const BADGE_ATTR = 'data-ytosc-badge';
-const BADGE_VERSION = 'v1';
+import { APP_CONFIG } from '../config';
+
+const BADGE_VERSION = APP_CONFIG.BADGE_VERSION;
 
 /**
  * Inject global styles for badges (call once)

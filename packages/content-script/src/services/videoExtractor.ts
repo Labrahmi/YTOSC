@@ -10,6 +10,7 @@ import {
   findViewElement,
   extractTitle
 } from '../utils/dom';
+import { logger } from '../utils/logger';
 
 /**
  * Extract video data from YouTube channel page
@@ -22,7 +23,7 @@ export function extractVideos(): VideoData[] {
   const videoElements = getVideoElements();
 
   if (videoElements.length === 0) {
-    console.warn('⚠️ No video elements found on page');
+    logger.warn('⚠️ No video elements found on page');
     return videos;
   }
 
@@ -50,7 +51,7 @@ export function extractVideos(): VideoData[] {
         url,
       });
     } catch (error) {
-      console.error(`Error extracting video ${index + 1}:`, error);
+      logger.error(`Error extracting video ${index + 1}:`, error);
       parseErrors++;
     }
   });

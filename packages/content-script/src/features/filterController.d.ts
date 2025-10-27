@@ -8,7 +8,7 @@ declare class FilterController {
     private currentSort;
     private loadingStartTime;
     private lastVideoCount;
-    private noProgressCount;
+    private consecutiveNoProgressChecks;
     private loadingCheckInterval;
     private readonly MAX_LOADING_TIME;
     private readonly NO_PROGRESS_THRESHOLD;

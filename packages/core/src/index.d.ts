@@ -10,4 +10,3 @@
  */
 export * from './viewParser';
 export * from './types';
-export * from './outlierScore';

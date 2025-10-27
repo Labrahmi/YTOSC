@@ -13,7 +13,7 @@ import { useFadeIn } from './hooks/useAnimations';
 import { useTheme } from './hooks/useTheme';
 import { useTabs } from './hooks/useTabs';
 
-const APP_VERSION = '1.0.0';
+// Version is now read from manifest.json during build
 
 function App() {
   const { data, refresh } = useLiveData();
@@ -100,7 +100,7 @@ function App() {
         )}
       </main>
 
-      <Footer version={APP_VERSION} />
+      <Footer version="1.0.0" />
     </div>
   );
 }

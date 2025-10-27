@@ -121,7 +121,7 @@ export function extractViewsText(viewsEl: HTMLElement | null): string | null {
   if (!viewsEl) return null;
 
   // Try textContent first
-  let text = viewsEl.textContent?.trim();
+  const text = viewsEl.textContent?.trim();
   if (text) return text;
 
   // Try aria-label as fallback

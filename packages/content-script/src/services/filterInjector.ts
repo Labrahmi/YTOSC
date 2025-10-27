@@ -5,6 +5,7 @@
 import { FILTER_SELECTORS } from '../constants';
 import { findFilterChipContainer, findPrimaryContentArea } from '../utils/dom';
 import { createFilterContainer } from '../components/filterChips';
+import { logger } from '../utils/logger';
 
 /**
  * Inject filter container into the YouTube page
@@ -28,7 +29,7 @@ export function injectFilterContainer(): boolean {
       // Create and inject the filter container between scroll-container and right-arrow
       const filterContainer = createFilterContainer();
       chipsContent.insertBefore(filterContainer, rightArrow);
-      console.log('✅ YTOSC Filter container injected in chips row');
+      logger.log('✅ YTOSC Filter container injected in chips row');
       return true;
     }
   }
@@ -57,7 +58,7 @@ export function injectFilterContainer(): boolean {
   }
 
   if (!targetContainer) {
-    console.warn('⚠️ Could not find suitable container for filter injection');
+    logger.warn('⚠️ Could not find suitable container for filter injection');
     return false;
   }
 
@@ -71,7 +72,7 @@ export function injectFilterContainer(): boolean {
     targetContainer.appendChild(filterContainer);
   }
 
-  console.log('✅ YTOSC Filter container injected (fallback)');
+  logger.log('✅ YTOSC Filter container injected (fallback)');
   return true;
 }
 
@@ -82,6 +83,6 @@ export function removeFilterContainer(): void {
   const container = document.querySelector(FILTER_SELECTORS.CONTAINER);
   if (container) {
     container.remove();
-    console.log('🗑️ YTOSC Filter container removed');
+    logger.log('🗑️ YTOSC Filter container removed');
   }
 }

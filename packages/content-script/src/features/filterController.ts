@@ -7,22 +7,23 @@ import { store } from '../state/store';
 import { setActiveChip } from '../ui/filterBar';
 import { showLoadingOverlay, updateLoadingMessage, hideLoadingOverlay } from '../ui/loadingOverlay';
 import { logger } from '../utils/logger';
+import { LOADING_CONFIG } from '../config';
 
 class FilterController {
   private currentThreshold: 2 | 5 | 10 | null = null;
   private scrollTriggerTimeout: number | null = null;
   private currentSort: 'ascending' | 'descending' | null = null;
-  
+
   // Loading timeout and progress tracking
   private loadingStartTime: number = 0;
   private lastVideoCount: number = 0;
-  private noProgressCount: number = 0;
+  private consecutiveNoProgressChecks: number = 0;
   private loadingCheckInterval: number | null = null;
   
-  // Constants for loading behavior
-  private readonly MAX_LOADING_TIME = 45000; // 45 seconds max (reduced from 60)
-  private readonly NO_PROGRESS_THRESHOLD = 3; // Give up after 3 checks with no progress
-  private readonly PROGRESS_CHECK_INTERVAL = 3000; // Check every 3 seconds (faster than 5s)
+  // Constants for loading behavior (from central config)
+  private readonly MAX_LOADING_TIME = LOADING_CONFIG.MAX_LOADING_TIME_MS;
+  private readonly NO_PROGRESS_THRESHOLD = LOADING_CONFIG.NO_PROGRESS_THRESHOLD; // Max consecutive checks without progress
+  private readonly PROGRESS_CHECK_INTERVAL = LOADING_CONFIG.PROGRESS_CHECK_INTERVAL_MS; // Check every 3 seconds
 
   /**
    * Apply filter with given threshold
@@ -119,7 +120,7 @@ class FilterController {
     // Initialize tracking variables
     this.loadingStartTime = Date.now();
     this.lastVideoCount = store.getState().list.length;
-    this.noProgressCount = 0;
+    this.consecutiveNoProgressChecks = 0;
     
     // Start interval to check progress
     this.loadingCheckInterval = window.setInterval(() => {
@@ -137,7 +138,7 @@ class FilterController {
       clearInterval(this.loadingCheckInterval);
       this.loadingCheckInterval = null;
     }
-    this.noProgressCount = 0;
+    this.consecutiveNoProgressChecks = 0;
   }
   
   /**
@@ -162,8 +163,8 @@ class FilterController {
     
     // Check if videos are being added
     if (currentVideoCount === this.lastVideoCount) {
-      this.noProgressCount++;
-      logger.log(`No progress detected (${this.noProgressCount}/${this.NO_PROGRESS_THRESHOLD})`);
+      this.consecutiveNoProgressChecks++;
+      logger.log(`No progress detected (${this.consecutiveNoProgressChecks}/${this.NO_PROGRESS_THRESHOLD})`);
       
       // Check if we've reached YouTube's end
       if (this.isAtChannelEnd()) {
@@ -177,7 +178,7 @@ class FilterController {
       }
       
       // Give up after no progress for too long
-      if (this.noProgressCount >= this.NO_PROGRESS_THRESHOLD) {
+      if (this.consecutiveNoProgressChecks >= this.NO_PROGRESS_THRESHOLD) {
         logger.warn('No progress after multiple checks, giving up');
         this.stopLoadingWithMessage(
           visibleCount,
@@ -188,7 +189,7 @@ class FilterController {
       }
     } else {
       // Progress detected, reset counter
-      this.noProgressCount = 0;
+      this.consecutiveNoProgressChecks = 0;
       this.lastVideoCount = currentVideoCount;
       logger.log(`Progress detected: ${currentVideoCount} total videos, ${visibleCount} visible`);
     }

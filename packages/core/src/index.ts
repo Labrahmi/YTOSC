@@ -11,7 +11,3 @@
 
 export * from './viewParser';
 export * from './types';
-
-// Deprecated: Reference implementation kept for testing and documentation
-// Active implementation: packages/content-script/src/calc/score.ts
-export * from './outlierScore';
